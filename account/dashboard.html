@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - NovaGlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .account-page {
+            padding-top: 100px;
+            min-height: 100vh;
+            background: var(--background-alt);
+        }
+
+        .account-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-xl);
+            padding: var(--space-2xl) 0;
+        }
+
+        .account-sidebar {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .user-info {
+            text-align: center;
+            padding-bottom: var(--space-xl);
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: var(--space-lg);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-md);
+            color: white;
+            font-size: 2rem;
+        }
+
+        .user-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: var(--space-xs);
+        }
+
+        .user-info p {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            color: var(--dark);
+            transition: var(--transition-base);
+            margin-bottom: var(--space-xs);
+        }
+
+        .sidebar-nav a:hover {
+            background: var(--gray-100);
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(74, 14, 78, 0.1);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .account-main {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .account-header h2 {
+            font-family: var(--font-body);
+            font-size: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-2xl);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--gray-100), var(--background));
+            padding: var(--space-xl);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .stat-card.accent {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.2));
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: var(--space-xs);
+        }
+
+        .stat-card p {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        .recent-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: var(--space-lg);
+        }
+
+        .recent-items {
+            display: grid;
+            gap: var(--space-md);
+        }
+
+        .recent-item {
+            display: flex;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--gray-100);
+            border-radius: var(--radius-md);
+        }
+
+        .recent-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+        }
+
+        .recent-item-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: var(--space-xs);
+        }
+
+        .recent-item-info p {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        .logout-btn {
+            color: var(--error) !important;
+            margin-top: var(--space-lg);
+        }
+
+        @media (max-width: 1024px) {
+            .account-container {
+                grid-template-columns: 1fr;
+            }
+
+            .account-sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="nav-logo">
+                <h1>Nova<span>Glow</span></h1>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../catalog.html">Catalog</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="wishlist.html" class="nav-action-btn"><i class="far fa-heart"></i></a>
+                <a href="cart.html" class="nav-action-btn"><i class="fas fa-shopping-bag"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="account-page">
+        <div class="container">
+            <div class="account-container">
+                <aside class="account-sidebar">
+                    <div class="user-info">
+                        <div class="user-avatar"><i class="fas fa-user"></i></div>
+                        <h3 id="user-name">Loading...</h3>
+                        <p id="user-email">...</p>
+                    </div>
+                    <nav class="sidebar-nav">
+                        <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
+                        <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="orders.html"><i class="fas fa-box"></i> My Orders</a>
+                        <a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="wishlist.html"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="liked.html"><i class="fas fa-thumbs-up"></i> Liked Items</a>
+                        <a href="#" class="logout-btn" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </nav>
+                </aside>
+
+                <main class="account-main">
+                    <div class="account-header">
+                        <h2>Welcome back, <span class="gold-text" id="welcome-name">User</span>!</h2>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3 id="cart-count">0</h3>
+                            <p>Items in Cart</p>
+                        </div>
+                        <div class="stat-card accent">
+                            <h3 id="wishlist-count">0</h3>
+                            <p>Wishlist Items</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="orders-count">0</h3>
+                            <p>Total Orders</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="liked-count">0</h3>
+                            <p>Liked Products</p>
+                        </div>
+                    </div>
+
+                    <div class="recent-section">
+                        <h3>Recent Activity</h3>
+                        <div class="recent-items" id="recent-items">
+                            <p style="color: var(--gray-500); text-align: center; padding: var(--space-xl);">No recent
+                                activity yet. Start shopping!</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: var(--space-2xl); text-align: center;">
+                        <a href="../catalog.html" class="btn btn-accent"><i class="fas fa-gem"></i> Continue
+                            Shopping</a>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db, ADMIN_EMAIL } from '../js/firebase-config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+
+            // Redirect admin to admin dashboard
+            if (user.email === ADMIN_EMAIL) {
+                window.location.href = '../admin/dashboard.html';
+                return;
+            }
+
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+
+                    document.getElementById('user-name').textContent = userData.displayName || 'User';
+                    document.getElementById('user-email').textContent = user.email;
+                    document.getElementById('welcome-name').textContent = (userData.displayName || 'User').split(' ')[0];
+
+                    document.getElementById('cart-count').textContent = userData.cart?.length || 0;
+                    document.getElementById('wishlist-count').textContent = userData.wishlist?.length || 0;
+                    document.getElementById('liked-count').textContent = userData.liked?.length || 0;
+
+                    // Get orders count
+                    const ordersQuery = query(collection(db, 'inquiries'), where('userId', '==', user.uid));
+                    const ordersSnapshot = await getDocs(ordersQuery);
+                    document.getElementById('orders-count').textContent = ordersSnapshot.size;
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await signOut(auth);
+            showToast('Logged out successfully', 'success');
+            setTimeout(() => window.location.href = '../index.html', 500);
+        });
+    </script>
+</body>
+
+</html>

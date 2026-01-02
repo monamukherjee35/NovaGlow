@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories - NovaGlow Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-lg);
+        }
+
+        .category-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        .category-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.2));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .category-info {
+            flex: 1;
+        }
+
+        .category-info h4 {
+            margin-bottom: var(--space-xs);
+        }
+
+        .category-info p {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h1>Nova<span>Glow</span></h1>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-section-title">Main</span>
+                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="products.html"><i class="fas fa-gem"></i> Products</a>
+                    <a href="orders.html"><i class="fas fa-envelope"></i> Orders</a>
+                </div>
+                <div class="nav-section">
+                    <span class="nav-section-title">Management</span>
+                    <a href="users.html"><i class="fas fa-users"></i> Customers</a>
+                    <a href="categories.html" class="active"><i class="fas fa-tags"></i> Categories</a>
+                </div>
+                <div class="nav-section">
+                    <a href="../index.html"><i class="fas fa-store"></i> View Store</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Categories</h1>
+                <button class="btn btn-primary" id="add-category-btn">
+                    <i class="fas fa-plus"></i> Add Category
+                </button>
+            </div>
+
+            <div class="categories-grid" id="categories-grid">
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Category Modal -->
+    <div class="modal-overlay" id="category-modal">
+        <div class="modal" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Category</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="category-form">
+                    <div class="form-group">
+                        <label class="form-label">Category Name *</label>
+                        <input type="text" class="form-input" id="cat-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Icon (Font Awesome class)</label>
+                        <input type="text" class="form-input" id="cat-icon" placeholder="e.g. fa-ring, fa-gem">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Image URL</label>
+                        <input type="url" class="form-input" id="cat-image" placeholder="https://...">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost modal-close">Cancel</button>
+                <button class="btn btn-primary" id="save-category">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db, ADMIN_EMAIL } from '../js/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        let categories = [];
+        let editingId = null;
+
+        const defaultCategories = [
+            { id: 'rings', name: 'Rings', icon: 'fa-ring' },
+            { id: 'necklaces', name: 'Necklaces', icon: 'fa-gem' },
+            { id: 'earrings', name: 'Earrings', icon: 'fa-star' },
+            { id: 'bracelets', name: 'Bracelets', icon: 'fa-circle' }
+        ];
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function loadCategories() {
+            // Get all products to count per category
+            const productsSnapshot = await getDocs(collection(db, 'products'));
+            const categoryCount = {};
+
+            productsSnapshot.forEach(doc => {
+                const product = doc.data();
+                const cat = (product.category || 'other').toLowerCase();
+                categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+            });
+
+            // Get categories from Firestore or use defaults
+            const categoriesSnapshot = await getDocs(collection(db, 'categories'));
+
+            if (categoriesSnapshot.empty) {
+                categories = defaultCategories.map(cat => ({
+                    ...cat,
+                    productCount: categoryCount[cat.id] || 0
+                }));
+            } else {
+                categories = categoriesSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    productCount: categoryCount[doc.id] || categoryCount[doc.data().name?.toLowerCase()] || 0
+                }));
+            }
+
+            renderCategories();
+        }
+
+        function renderCategories() {
+            const grid = document.getElementById('categories-grid');
+
+            if (categories.length === 0) {
+                grid.innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: 2rem;">No categories yet. Add your first category!</p>';
+                return;
+            }
+
+            grid.innerHTML = categories.map(cat => `
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas ${cat.icon || 'fa-tag'}"></i>
+                    </div>
+                    <div class="category-info">
+                        <h4>${cat.name}</h4>
+                        <p>${cat.productCount || 0} products</p>
+                    </div>
+                    <div class="category-actions">
+                        <button class="action-btn edit-btn" data-id="${cat.id}"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn delete delete-btn" data-id="${cat.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => editCategory(btn.dataset.id));
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => deleteCategory(btn.dataset.id));
+            });
+        }
+
+        function editCategory(id) {
+            editingId = id;
+            const cat = categories.find(c => c.id === id);
+            if (!cat) return;
+
+            document.getElementById('modal-title').textContent = 'Edit Category';
+            document.getElementById('cat-name').value = cat.name;
+            document.getElementById('cat-icon').value = cat.icon || '';
+            document.getElementById('cat-image').value = cat.image || '';
+
+            document.getElementById('category-modal').classList.add('active');
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('Delete this category?')) return;
+
+            try {
+                await deleteDoc(doc(db, 'categories', id));
+                categories = categories.filter(c => c.id !== id);
+                renderCategories();
+                showToast('Category deleted', 'success');
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                showToast('Error deleting category', 'error');
+            }
+        }
+
+        document.getElementById('add-category-btn').addEventListener('click', () => {
+            editingId = null;
+            document.getElementById('modal-title').textContent = 'Add Category';
+            document.getElementById('category-form').reset();
+            document.getElementById('category-modal').classList.add('active');
+        });
+
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('category-modal').classList.remove('active');
+            });
+        });
+
+        document.getElementById('save-category').addEventListener('click', async () => {
+            const name = document.getElementById('cat-name').value.trim();
+            const icon = document.getElementById('cat-icon').value.trim();
+            const image = document.getElementById('cat-image').value.trim();
+
+            if (!name) {
+                showToast('Please enter category name', 'error');
+                return;
+            }
+
+            try {
+                const id = editingId || name.toLowerCase().replace(/\s+/g, '-');
+                await setDoc(doc(db, 'categories', id), { name, icon, image });
+
+                if (editingId) {
+                    const index = categories.findIndex(c => c.id === editingId);
+                    categories[index] = { ...categories[index], name, icon, image };
+                    showToast('Category updated', 'success');
+                } else {
+                    categories.push({ id, name, icon, image, productCount: 0 });
+                    showToast('Category added', 'success');
+                }
+
+                document.getElementById('category-modal').classList.remove('active');
+                renderCategories();
+            } catch (error) {
+                console.error('Error saving category:', error);
+                showToast('Error saving category', 'error');
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user || user.email !== ADMIN_EMAIL) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+            await loadCategories();
+        });
+    </script>
+</body>
+
+</html>

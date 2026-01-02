@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - NovaGlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .phone-section {
+            display: none;
+        }
+
+        .phone-section.active {
+            display: block;
+        }
+
+        .otp-inputs {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: center;
+            margin: var(--space-lg) 0;
+        }
+
+        .otp-inputs input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            transition: var(--transition-base);
+        }
+
+        .otp-inputs input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .phone-input-wrapper {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .country-code {
+            width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-page">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="../index.html" class="nav-logo"
+                    style="justify-content: center; margin-bottom: var(--space-lg);">
+                    <h1 style="font-size: 2rem;">Nova<span class="gold-text">Glow</span></h1>
+                </a>
+                <h2>Create Account</h2>
+                <p>Join NovaGlow for exclusive jewelry</p>
+            </div>
+
+            <!-- Google Sign Up -->
+            <button class="google-btn" id="google-signup">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Sign up with Google
+            </button>
+
+            <div class="auth-divider">or sign up with phone</div>
+
+            <!-- Phone Number Section -->
+            <div class="phone-section active" id="phone-section">
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <div class="phone-input-wrapper">
+                        <input type="text" class="form-input country-code" value="+91" id="country-code">
+                        <input type="tel" class="form-input" id="phone-number" placeholder="Your phone number"
+                            style="flex: 1;">
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" id="send-otp-btn">
+                    <i class="fas fa-paper-plane"></i> Send OTP
+                </button>
+                <p id="phone-error"
+                    style="color: var(--error); font-size: 0.875rem; margin-top: var(--space-md); display: none;"></p>
+            </div>
+
+            <!-- OTP Verification Section -->
+            <div class="phone-section" id="otp-section">
+                <p style="text-align: center; color: var(--gray-500); margin-bottom: var(--space-md);">
+                    Enter the 6-digit code sent to <strong id="display-phone"></strong>
+                </p>
+                <div class="otp-inputs">
+                    <input type="text" maxlength="1" class="otp-input" data-index="0">
+                    <input type="text" maxlength="1" class="otp-input" data-index="1">
+                    <input type="text" maxlength="1" class="otp-input" data-index="2">
+                    <input type="text" maxlength="1" class="otp-input" data-index="3">
+                    <input type="text" maxlength="1" class="otp-input" data-index="4">
+                    <input type="text" maxlength="1" class="otp-input" data-index="5">
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" id="verify-otp-btn">
+                    Verify & Create Account
+                </button>
+                <button class="btn btn-ghost" style="width: 100%; margin-top: var(--space-md);" id="change-number-btn">
+                    <i class="fas fa-arrow-left"></i> Change Number
+                </button>
+                <p id="otp-error"
+                    style="color: var(--error); font-size: 0.875rem; margin-top: var(--space-md); display: none;"></p>
+            </div>
+
+            <p class="auth-footer">
+                Already have an account? <a href="login.html">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <div id="recaptcha-container"></div>
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { signInWithGoogle, setupRecaptcha, sendPhoneOTP, verifyPhoneOTP } from '../js/auth.js';
+        import { auth, ADMIN_EMAIL } from '../js/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                if (user.email === ADMIN_EMAIL) {
+                    window.location.href = '../admin/dashboard.html';
+                } else {
+                    window.location.href = '../account/dashboard.html';
+                }
+            }
+        });
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        window.onload = () => {
+            setupRecaptcha('recaptcha-container');
+        };
+
+        document.getElementById('google-signup').addEventListener('click', async () => {
+            const result = await signInWithGoogle();
+            if (result.success) {
+                showToast('Account created successfully!', 'success');
+                setTimeout(() => {
+                    if (result.user.email === ADMIN_EMAIL) {
+                        window.location.href = '../admin/dashboard.html';
+                    } else {
+                        window.location.href = '../account/dashboard.html';
+                    }
+                }, 500);
+            } else {
+                showToast(result.error, 'error');
+            }
+        });
+
+        document.getElementById('send-otp-btn').addEventListener('click', async () => {
+            const countryCode = document.getElementById('country-code').value.trim();
+            const phoneNumber = document.getElementById('phone-number').value.trim().replace(/\s/g, '');
+            const fullPhone = countryCode + phoneNumber;
+            const errorEl = document.getElementById('phone-error');
+            const btn = document.getElementById('send-otp-btn');
+
+            if (!phoneNumber || phoneNumber.length < 10) {
+                errorEl.textContent = 'Please enter a valid phone number';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            errorEl.style.display = 'none';
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            const result = await sendPhoneOTP(fullPhone);
+
+            if (result.success) {
+                document.getElementById('phone-section').classList.remove('active');
+                document.getElementById('otp-section').classList.add('active');
+                document.getElementById('display-phone').textContent = fullPhone;
+                document.querySelector('.otp-input').focus();
+                showToast('OTP sent!', 'success');
+            } else {
+                errorEl.textContent = result.error;
+                errorEl.style.display = 'block';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+        });
+
+        document.querySelectorAll('.otp-input').forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < 5) {
+                    document.querySelectorAll('.otp-input')[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    document.querySelectorAll('.otp-input')[index - 1].focus();
+                }
+            });
+        });
+
+        document.getElementById('verify-otp-btn').addEventListener('click', async () => {
+            let otp = '';
+            document.querySelectorAll('.otp-input').forEach(input => otp += input.value);
+            const errorEl = document.getElementById('otp-error');
+            const btn = document.getElementById('verify-otp-btn');
+
+            if (otp.length !== 6) {
+                errorEl.textContent = 'Please enter the complete OTP';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+            const result = await verifyPhoneOTP(otp);
+
+            if (result.success) {
+                showToast('Account created!', 'success');
+                setTimeout(() => window.location.href = '../account/dashboard.html', 500);
+            } else {
+                errorEl.textContent = result.error;
+                errorEl.style.display = 'block';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = 'Verify & Create Account';
+        });
+
+        document.getElementById('change-number-btn').addEventListener('click', () => {
+            document.getElementById('otp-section').classList.remove('active');
+            document.getElementById('phone-section').classList.add('active');
+            document.querySelectorAll('.otp-input').forEach(input => input.value = '');
+        });
+    </script>
+</body>
+
+</html>

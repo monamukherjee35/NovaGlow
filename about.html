@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - NovaGlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .about-hero {
+            padding: 150px 0 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .about-hero h1 {
+            color: white;
+            margin-bottom: var(--space-md);
+        }
+
+        .about-hero p {
+            color: var(--gray-300);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .about-content {
+            padding: var(--space-3xl) 0;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-3xl);
+            align-items: center;
+            margin-bottom: var(--space-3xl);
+        }
+
+        .about-grid.reverse {
+            direction: rtl;
+        }
+
+        .about-grid.reverse>* {
+            direction: ltr;
+        }
+
+        .about-image {
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+
+        .about-text h2 {
+            margin-bottom: var(--space-lg);
+        }
+
+        .about-text p {
+            color: var(--gray-600);
+            line-height: 1.8;
+            margin-bottom: var(--space-md);
+        }
+
+        .values-section {
+            background: var(--background-alt);
+            padding: var(--space-3xl) 0;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-xl);
+        }
+
+        .value-card {
+            background: white;
+            padding: var(--space-xl);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .value-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto var(--space-lg);
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .value-card h4 {
+            margin-bottom: var(--space-sm);
+        }
+
+        .value-card p {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+
+            .about-grid,
+            .about-grid.reverse {
+                grid-template-columns: 1fr;
+                direction: ltr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">
+                <h1>Nova<span>Glow</span></h1>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="catalog.html">Catalog</a></li>
+                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="account/wishlist.html" class="nav-action-btn"><i class="far fa-heart"></i></a>
+                <a href="account/cart.html" class="nav-action-btn"><i class="fas fa-shopping-bag"></i></a>
+                <div id="auth-buttons"><a href="auth/login.html" class="btn btn-outline btn-sm">Login</a></div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="about-hero">
+        <div class="container">
+            <h1>About <span class="gold-text">NovaGlow</span></h1>
+            <p>Explore the personal jewelry collection of Bhoomi/Mona - each piece tells a story of elegance and style.
+            </p>
+        </div>
+    </section>
+
+    <section class="about-content">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?q=80&w=800" alt="Our Story">
+                </div>
+                <div class="about-text">
+                    <h2>Our <span class="gold-text">Story</span></h2>
+                    <p>NovaGlow showcases the exclusive personal jewelry collection of Bhoomi/Mona. Each piece in this
+                        collection has been carefully selected and is now available for purchase.</p>
+                    <p>Every item you see here is a unique piece from this personal collection. We believe that jewelry
+                        is more than just an accessory—it's a reflection of personal style and a keeper of precious
+                        memories.</p>
+                </div>
+            </div>
+
+            <div class="about-grid reverse">
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=800" alt="Our Craft">
+                </div>
+                <div class="about-text">
+                    <h2>Our <span class="gold-text">Craft</span></h2>
+                    <p>We work with skilled artisans who bring decades of experience to every piece they create. From
+                        the initial design to the final polish, each step is executed with precision and care.</p>
+                    <p>Our commitment to quality means we use only the finest materials—ethically sourced gemstones,
+                        high-grade precious metals, and sustainable practices throughout our production process.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="values-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Our <span class="gold-text">Values</span></h2>
+                <p>The principles that guide everything we do</p>
+            </div>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-gem"></i></div>
+                    <h4>Quality First</h4>
+                    <p>We never compromise on quality. Every piece undergoes rigorous quality checks to ensure
+                        perfection.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-heart"></i></div>
+                    <h4>Customer Love</h4>
+                    <p>Your satisfaction is our priority. We're committed to providing an exceptional shopping
+                        experience.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-leaf"></i></div>
+                    <h4>Sustainability</h4>
+                    <p>We're committed to ethical sourcing and sustainable practices to protect our planet.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-paint-brush"></i></div>
+                    <h4>Artistry</h4>
+                    <p>We celebrate the art of jewelry making, blending traditional techniques with modern design.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" style="text-align: center;">
+        <div class="container">
+            <h2>Ready to Find Your <span class="gold-text">Perfect Piece</span>?</h2>
+            <p style="color: var(--gray-500); margin-bottom: var(--space-xl);">Explore our collection and discover
+                jewelry that speaks to your style</p>
+            <a href="catalog.html" class="btn btn-accent btn-lg"><i class="fas fa-gem"></i> Shop Now</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border-top: none;">
+                <p>&copy; 2025 NovaGlow. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

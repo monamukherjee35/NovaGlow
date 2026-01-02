@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - NovaGlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .product-page {
+            padding-top: 100px;
+            min-height: 100vh;
+            padding-bottom: var(--space-3xl);
+        }
+
+        .product-detail {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-3xl);
+            margin-top: var(--space-2xl);
+        }
+
+        .product-gallery {
+            position: sticky;
+            top: 100px;
+        }
+
+        .main-image {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            margin-bottom: var(--space-md);
+            background: var(--gray-100);
+        }
+
+        .main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .thumbnail-list {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition-base);
+        }
+
+        .thumbnail.active,
+        .thumbnail:hover {
+            border-color: var(--accent);
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-details {
+            padding: var(--space-lg) 0;
+        }
+
+        .product-category-tag {
+            display: inline-block;
+            padding: var(--space-xs) var(--space-md);
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--accent-dark);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: var(--radius-full);
+            margin-bottom: var(--space-md);
+        }
+
+        .product-title {
+            font-size: 2rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .product-pricing {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .product-pricing .price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .product-desc {
+            color: var(--gray-600);
+            line-height: 1.8;
+            margin-bottom: var(--space-xl);
+        }
+
+        .product-meta {
+            margin-bottom: var(--space-xl);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .meta-item i {
+            width: 24px;
+            color: var(--accent);
+        }
+
+        .meta-item strong {
+            min-width: 100px;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .quantity-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-100);
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: var(--transition-base);
+        }
+
+        .quantity-btn:hover {
+            background: var(--gray-200);
+        }
+
+        .quantity-input {
+            width: 60px;
+            height: 40px;
+            text-align: center;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .product-actions .btn {
+            flex: 1;
+        }
+
+        .trust-badges {
+            display: flex;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            padding: var(--space-lg);
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+        }
+
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .trust-badge i {
+            color: var(--success);
+        }
+
+        .related-section {
+            margin-top: var(--space-3xl);
+        }
+
+        @media (max-width: 1024px) {
+            .product-detail {
+                grid-template-columns: 1fr;
+            }
+
+            .product-gallery {
+                position: static;
+            }
+        }
+
+        /* Success Modal Styles */
+        .success-content {
+            text-align: center;
+            padding: var(--space-xl);
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--space-lg);
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .success-content h2 {
+            color: var(--success);
+            margin-bottom: var(--space-sm);
+        }
+
+        .success-content p {
+            color: var(--gray-500);
+            margin-bottom: var(--space-xl);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">
+                <h1>Nova<span>Glow</span></h1>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="catalog.html">Catalog</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="account/wishlist.html" class="nav-action-btn"><i class="far fa-heart"></i></a>
+                <a href="account/cart.html" class="nav-action-btn"><i class="fas fa-shopping-bag"></i></a>
+                <div id="auth-buttons"><a href="auth/login.html" class="btn btn-outline btn-sm">Login</a></div>
+                <div id="user-menu" class="nav-user" style="display: none;"><i class="far fa-user-circle"
+                        style="font-size: 1.5rem;"></i></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="product-page">
+        <div class="container">
+            <div class="product-detail">
+                <div class="product-gallery">
+                    <div class="main-image">
+                        <img id="main-product-image" src="" alt="Product Image">
+                    </div>
+                    <div class="thumbnail-list" id="thumbnail-list"></div>
+                </div>
+
+                <div class="product-details">
+                    <span class="product-category-tag" id="product-category"></span>
+                    <h1 class="product-title" id="product-name"></h1>
+                    <div class="product-pricing">
+                        <span class="price" id="product-price"></span>
+                    </div>
+                    <p class="product-desc" id="product-description"></p>
+
+                    <div class="product-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-gem"></i>
+                            <strong>Materials:</strong>
+                            <span id="product-materials">-</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-certificate"></i>
+                            <strong>Authenticity:</strong>
+                            <span>100% Certified Genuine</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-truck"></i>
+                            <strong>Delivery:</strong>
+                            <span id="product-delivery-time">5-7 Business Days</span>
+                        </div>
+                        <div class="meta-item" id="shipping-cost-item">
+                            <i class="fas fa-rupee-sign"></i>
+                            <strong>Shipping:</strong>
+                            <span id="product-shipping-cost">Free</span>
+                        </div>
+                    </div>
+
+                    <div class="quantity-selector">
+                        <span>Quantity:</span>
+                        <button class="quantity-btn" id="qty-minus">-</button>
+                        <input type="number" class="quantity-input" id="quantity" value="1" min="1">
+                        <button class="quantity-btn" id="qty-plus">+</button>
+                    </div>
+
+                    <div class="product-actions">
+                        <button class="btn btn-accent btn-lg" id="buy-now-btn">
+                            <i class="fas fa-shopping-bag"></i> Buy Now
+                        </button>
+                        <button class="btn btn-outline btn-lg" id="add-cart-btn">
+                            Add to Cart
+                        </button>
+                        <button class="btn btn-ghost btn-icon" id="wishlist-btn" title="Add to Wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+
+                    <div class="trust-badges" id="trust-badges">
+                        <div class="trust-badge"><i class="fas fa-check-circle"></i> Genuine Products</div>
+                        <div class="trust-badge"><i class="fas fa-shield-alt"></i> Secure Packaging</div>
+                        <div class="trust-badge" id="badge-returns" style="display:none;"><i class="fas fa-undo"></i>
+                            Easy Returns</div>
+                        <div class="trust-badge" id="badge-cod" style="display:none;"><i class="fas fa-money-bill"></i>
+                            COD Available</div>
+                        <div class="trust-badge" id="badge-free-delivery" style="display:none;"><i
+                                class="fas fa-truck"></i> Free Delivery</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buy Now / Inquiry Modal -->
+    <div class="modal-overlay" id="inquiry-modal">
+        <div class="modal" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-shopping-bag gold-text"></i> Complete Your Order</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div
+                    style="background: var(--gray-100); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); display: flex; gap: var(--space-md); align-items: center;">
+                    <img id="modal-product-image" src="" alt=""
+                        style="width: 60px; height: 60px; border-radius: var(--radius-sm); object-fit: cover;">
+                    <div>
+                        <h4 id="modal-product-name" style="font-size: 1rem; margin-bottom: 4px;"></h4>
+                        <p id="modal-product-price" style="color: var(--primary); font-weight: 600;"></p>
+                    </div>
+                </div>
+
+                <form id="inquiry-form">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-input" id="inq-name" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" class="form-input" id="inq-email" placeholder="Your email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Number *</label>
+                        <input type="tel" class="form-input" id="inq-phone" placeholder="Your phone number" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Delivery Address *</label>
+                        <textarea class="form-input form-textarea" id="inq-address"
+                            placeholder="Enter complete delivery address with pincode" required></textarea>
+                    </div>
+                    <div class="form-group" id="saved-addresses-group" style="display: none;">
+                        <label class="form-label">Or select saved address:</label>
+                        <select class="form-input form-select" id="saved-addresses">
+                            <option value="">Choose an address...</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost modal-close">Cancel</button>
+                <button class="btn btn-accent" id="submit-inquiry">
+                    <i class="fas fa-paper-plane"></i> Submit Order Request
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal" style="max-width: 450px;">
+            <div class="modal-body">
+                <div class="success-content">
+                    <div class="success-icon"><i class="fas fa-check"></i></div>
+                    <h2>Order Request Submitted!</h2>
+                    <p>Thank you for your interest. Our team will contact you shortly to confirm your order and arrange
+                        delivery.</p>
+                    <button class="btn btn-primary" onclick="window.location.href='catalog.html'">Continue
+                        Shopping</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+                <p>&copy; 2025 NovaGlow. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { doc, getDoc, updateDoc, arrayUnion, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+
+        let currentProduct = null;
+        let currentUser = null;
+        let userData = null;
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(price);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Load product from Firestore
+        async function loadProduct() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+
+            if (!productId) {
+                window.location.href = 'catalog.html';
+                return;
+            }
+
+            try {
+                const productDoc = await getDoc(doc(db, 'products', productId));
+
+                if (!productDoc.exists()) {
+                    showToast('Product not found', 'error');
+                    setTimeout(() => window.location.href = 'catalog.html', 1500);
+                    return;
+                }
+
+                currentProduct = { id: productDoc.id, ...productDoc.data() };
+
+                document.title = `${currentProduct.name} - NovaGlow`;
+                document.getElementById('product-name').textContent = currentProduct.name;
+                document.getElementById('product-category').textContent = currentProduct.category || 'Jewelry';
+                document.getElementById('product-price').textContent = formatPrice(currentProduct.price);
+                document.getElementById('product-description').textContent = currentProduct.description || 'A beautiful piece from our exquisite collection.';
+                document.getElementById('product-materials').textContent = currentProduct.materials || '-';
+
+                // Handle images - support both single image and array of images
+                let images = [];
+                if (Array.isArray(currentProduct.images) && currentProduct.images.length > 0) {
+                    images = currentProduct.images;
+                } else if (currentProduct.image) {
+                    images = [currentProduct.image];
+                }
+
+                const mainImageIndex = currentProduct.mainImageIndex || 0;
+                const mainImage = images[mainImageIndex] || images[0] || 'https://via.placeholder.com/800x800?text=Product';
+
+                document.getElementById('main-product-image').src = mainImage;
+                document.getElementById('main-product-image').onerror = function () {
+                    this.src = 'https://via.placeholder.com/800x800?text=Product';
+                };
+
+                // Render thumbnail gallery if multiple images
+                const thumbnailList = document.getElementById('thumbnail-list');
+                if (images.length > 1) {
+                    thumbnailList.innerHTML = images.map((img, index) => `
+                        <div class="thumbnail ${index === mainImageIndex ? 'active' : ''}" data-index="${index}">
+                            <img src="${img}" alt="Product image ${index + 1}" onerror="this.src='https://via.placeholder.com/80x80?text=Image'">
+                        </div>
+                    `).join('');
+
+                    // Add click handlers to thumbnails
+                    thumbnailList.querySelectorAll('.thumbnail').forEach(thumb => {
+                        thumb.addEventListener('click', () => {
+                            const index = parseInt(thumb.dataset.index);
+                            document.getElementById('main-product-image').src = images[index];
+                            thumbnailList.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+                            thumb.classList.add('active');
+                        });
+                    });
+                } else {
+                    thumbnailList.innerHTML = '';
+                }
+
+                // Check stock status
+                const stockStatus = currentProduct.stockStatus || 'available';
+                if (stockStatus === 'sold') {
+                    document.getElementById('buy-now-btn').disabled = true;
+                    document.getElementById('buy-now-btn').innerHTML = '<i class="fas fa-times-circle"></i> Sold';
+                    document.getElementById('buy-now-btn').style.opacity = '0.5';
+                    document.getElementById('add-cart-btn').disabled = true;
+                    document.getElementById('add-cart-btn').textContent = 'Not Available';
+                    document.getElementById('add-cart-btn').style.opacity = '0.5';
+                }
+
+                // Display delivery options
+                document.getElementById('product-delivery-time').textContent = currentProduct.deliveryTime || '5-7 Business Days';
+
+                // Shipping cost display
+                const shippingCost = currentProduct.shippingCost || 0;
+                const freeDelivery = currentProduct.freeDelivery === true;
+                if (freeDelivery || shippingCost === 0) {
+                    document.getElementById('product-shipping-cost').textContent = 'Free';
+                    document.getElementById('product-shipping-cost').style.color = 'var(--success)';
+                    document.getElementById('badge-free-delivery').style.display = 'flex';
+                } else {
+                    document.getElementById('product-shipping-cost').textContent = formatPrice(shippingCost);
+                }
+
+                // COD availability
+                if (currentProduct.codAvailable !== false) {
+                    document.getElementById('badge-cod').style.display = 'flex';
+                }
+
+                // Easy returns
+                if (currentProduct.returnable !== false) {
+                    document.getElementById('badge-returns').style.display = 'flex';
+                }
+
+                // Modal product info - use main image
+                document.getElementById('modal-product-image').src = mainImage;
+                document.getElementById('modal-product-name').textContent = currentProduct.name;
+                document.getElementById('modal-product-price').textContent = formatPrice(currentProduct.price);
+            } catch (error) {
+                console.error('Error loading product:', error);
+                showToast('Error loading product', 'error');
+                setTimeout(() => window.location.href = 'catalog.html', 1500);
+            }
+        }
+
+        // Quantity controls
+        document.getElementById('qty-minus').addEventListener('click', () => {
+            const input = document.getElementById('quantity');
+            if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
+        });
+
+        document.getElementById('qty-plus').addEventListener('click', () => {
+            const input = document.getElementById('quantity');
+            input.value = parseInt(input.value) + 1;
+        });
+
+        // Buy Now - Open Modal
+        document.getElementById('buy-now-btn').addEventListener('click', () => {
+            const modal = document.getElementById('inquiry-modal');
+            modal.classList.add('active');
+
+            // Prefill if logged in
+            if (currentUser && userData) {
+                document.getElementById('inq-name').value = userData.displayName || '';
+                document.getElementById('inq-email').value = userData.email || currentUser.email || '';
+                document.getElementById('inq-phone').value = userData.phone || '';
+
+                // Show saved addresses if available
+                if (userData.addresses && userData.addresses.length > 0) {
+                    const group = document.getElementById('saved-addresses-group');
+                    const select = document.getElementById('saved-addresses');
+                    group.style.display = 'block';
+
+                    select.innerHTML = '<option value="">Choose an address...</option>' +
+                        userData.addresses.map((addr, i) => `<option value="${i}">${addr.label || 'Address'}: ${addr.address.substring(0, 40)}...</option>`).join('');
+
+                    select.addEventListener('change', () => {
+                        if (select.value !== '') {
+                            const addr = userData.addresses[parseInt(select.value)];
+                            document.getElementById('inq-address').value = `${addr.fullName}\n${addr.phone}\n${addr.address}, ${addr.city}, ${addr.state} - ${addr.pincode}`;
+                        }
+                    });
+                }
+            }
+        });
+
+        // Close modals
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+            });
+        });
+
+        // Submit Order
+        document.getElementById('submit-inquiry').addEventListener('click', async () => {
+            const name = document.getElementById('inq-name').value.trim();
+            const email = document.getElementById('inq-email').value.trim();
+            const phone = document.getElementById('inq-phone').value.trim();
+            const address = document.getElementById('inq-address').value.trim();
+
+            if (!name || !email || !phone || !address) {
+                showToast('Please fill all required fields', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('submit-inquiry');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            try {
+                // Save order to Firestore
+                await addDoc(collection(db, 'orders'), {
+                    userId: currentUser?.uid || null,
+                    productId: currentProduct.id,
+                    productName: currentProduct.name,
+                    productPrice: currentProduct.price,
+                    productImage: currentProduct.image,
+                    quantity: parseInt(document.getElementById('quantity').value),
+                    customerName: name,
+                    customerEmail: email,
+                    customerPhone: phone,
+                    deliveryAddress: address,
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                });
+
+                // Mark product as sold
+                await updateDoc(doc(db, 'products', currentProduct.id), {
+                    stockStatus: 'sold'
+                });
+
+                document.getElementById('inquiry-modal').classList.remove('active');
+                document.getElementById('success-modal').classList.add('active');
+
+            } catch (error) {
+                console.error('Error submitting order:', error);
+                showToast('Error submitting order. Please try again.', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Order Request';
+        });
+
+        // Add to Cart
+        document.getElementById('add-cart-btn').addEventListener('click', async () => {
+            if (!currentUser) {
+                showToast('Please login to add items to cart', 'warning');
+                return;
+            }
+
+            try {
+                const userRef = doc(db, 'users', currentUser.uid);
+                await updateDoc(userRef, {
+                    cart: arrayUnion({
+                        productId: currentProduct.id,
+                        quantity: parseInt(document.getElementById('quantity').value),
+                        addedAt: new Date().toISOString()
+                    })
+                });
+                showToast('Added to cart!', 'success');
+            } catch (error) {
+                showToast('Error adding to cart', 'error');
+            }
+        });
+
+        // Add to Wishlist
+        document.getElementById('wishlist-btn').addEventListener('click', async () => {
+            if (!currentUser) {
+                showToast('Please login to add to wishlist', 'warning');
+                return;
+            }
+
+            try {
+                const userRef = doc(db, 'users', currentUser.uid);
+                await updateDoc(userRef, { wishlist: arrayUnion(currentProduct.id) });
+                showToast('Added to wishlist!', 'success');
+                document.getElementById('wishlist-btn').innerHTML = '<i class="fas fa-heart" style="color: var(--error);"></i>';
+            } catch (error) {
+                showToast('Error updating wishlist', 'error');
+            }
+        });
+
+        // Auth state
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                }
+                document.getElementById('auth-buttons').style.display = 'none';
+                document.getElementById('user-menu').style.display = 'flex';
+            }
+        });
+
+        // Initialize
+        loadProduct().then(() => {
+            // Auto-open buy modal if #buy hash is present
+            if (window.location.hash === '#buy') {
+                const stockStatus = currentProduct?.stockStatus || 'available';
+                if (stockStatus !== 'sold') {
+                    setTimeout(() => {
+                        document.getElementById('buy-now-btn').click();
+                    }, 500);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

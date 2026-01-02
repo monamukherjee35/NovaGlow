@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers - NovaGlow Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h1>Nova<span>Glow</span></h1>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-section-title">Main</span>
+                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="products.html"><i class="fas fa-gem"></i> Products</a>
+                    <a href="orders.html"><i class="fas fa-envelope"></i> Orders</a>
+                </div>
+                <div class="nav-section">
+                    <span class="nav-section-title">Management</span>
+                    <a href="users.html" class="active"><i class="fas fa-users"></i> Customers</a>
+                    <a href="categories.html"><i class="fas fa-tags"></i> Categories</a>
+                </div>
+                <div class="nav-section">
+                    <a href="../index.html"><i class="fas fa-store"></i> View Store</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Customer Management</h1>
+            </div>
+
+            <div class="filters-bar">
+                <div class="search-input">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search customers...">
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <div class="card-body" style="padding: 0;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Cart Items</th>
+                                <th>Wishlist</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    <i class="fas fa-users"></i>
+                                    <p>No customers yet</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Customer Detail Modal -->
+    <div class="modal-overlay" id="user-modal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Customer Details</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: var(--space-xl);">
+                    <div
+                        style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); color: white; font-size: 2rem;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3 id="user-name"></h3>
+                    <p style="color: var(--gray-500);" id="user-email"></p>
+                </div>
+                <div style="display: grid; gap: var(--space-md);">
+                    <div
+                        style="display: flex; justify-content: space-between; padding: var(--space-md); background: var(--gray-100); border-radius: var(--radius-md);">
+                        <span>Phone</span>
+                        <strong id="user-phone">-</strong>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; padding: var(--space-md); background: var(--gray-100); border-radius: var(--radius-md);">
+                        <span>Cart Items</span>
+                        <strong id="user-cart">0</strong>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; padding: var(--space-md); background: var(--gray-100); border-radius: var(--radius-md);">
+                        <span>Wishlist Items</span>
+                        <strong id="user-wishlist">0</strong>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; padding: var(--space-md); background: var(--gray-100); border-radius: var(--radius-md);">
+                        <span>Liked Items</span>
+                        <strong id="user-liked">0</strong>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; padding: var(--space-md); background: var(--gray-100); border-radius: var(--radius-md);">
+                        <span>Saved Addresses</span>
+                        <strong id="user-addresses">0</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost modal-close">Close</button>
+                <a id="email-user-btn" href="" class="btn btn-primary"><i class="fas fa-envelope"></i> Email
+                    Customer</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db, ADMIN_EMAIL } from '../js/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        let users = [];
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'N/A';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        async function loadUsers() {
+            try {
+                const q = query(collection(db, 'users'), where('role', '==', 'customer'));
+                const snapshot = await getDocs(q);
+                users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderUsers();
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        function renderUsers(filter = '') {
+            const filtered = users.filter(u => {
+                return u.displayName?.toLowerCase().includes(filter.toLowerCase()) ||
+                    u.email?.toLowerCase().includes(filter.toLowerCase());
+            });
+
+            const tbody = document.getElementById('users-table');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <p>No customers found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(user => `
+                <tr>
+                    <td>
+                        <div class="product-cell">
+                            <div style="width: 40px; height: 40px; background: var(--gray-200); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user" style="color: var(--gray-500);"></i>
+                            </div>
+                            <div>
+                                <h4>${user.displayName || 'User'}</h4>
+                                <p>${user.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${user.phone || '-'}</td>
+                    <td>${user.cart?.length || 0}</td>
+                    <td>${user.wishlist?.length || 0}</td>
+                    <td>${formatDate(user.createdAt)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn view-btn" data-id="${user.id}"><i class="fas fa-eye"></i></button>
+                            <a href="mailto:${user.email}" class="action-btn"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => viewUser(btn.dataset.id));
+            });
+        }
+
+        function viewUser(id) {
+            const user = users.find(u => u.id === id);
+            if (!user) return;
+
+            document.getElementById('user-name').textContent = user.displayName || 'User';
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('user-phone').textContent = user.phone || '-';
+            document.getElementById('user-cart').textContent = user.cart?.length || 0;
+            document.getElementById('user-wishlist').textContent = user.wishlist?.length || 0;
+            document.getElementById('user-liked').textContent = user.liked?.length || 0;
+            document.getElementById('user-addresses').textContent = user.addresses?.length || 0;
+            document.getElementById('email-user-btn').href = `mailto:${user.email}`;
+
+            document.getElementById('user-modal').classList.add('active');
+        }
+
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('user-modal').classList.remove('active');
+            });
+        });
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            renderUsers(e.target.value);
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email !== ADMIN_EMAIL) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+            loadUsers();
+        });
+    </script>
+</body>
+
+</html>

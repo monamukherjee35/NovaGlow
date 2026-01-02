@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - NovaGlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .account-page {
+            padding-top: 100px;
+            min-height: 100vh;
+            background: var(--background-alt);
+        }
+
+        .account-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-xl);
+            padding: var(--space-2xl) 0;
+        }
+
+        .account-sidebar {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .user-info {
+            text-align: center;
+            padding-bottom: var(--space-xl);
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: var(--space-lg);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-md);
+            color: white;
+            font-size: 2rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            color: var(--dark);
+            transition: var(--transition-base);
+            margin-bottom: var(--space-xs);
+        }
+
+        .sidebar-nav a:hover {
+            background: var(--gray-100);
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(74, 14, 78, 0.1);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .account-main {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .account-header {
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .profile-section {
+            margin-bottom: var(--space-2xl);
+        }
+
+        .profile-section h3 {
+            margin-bottom: var(--space-lg);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .profile-section h3 i {
+            color: var(--accent);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-lg);
+        }
+
+        .address-card {
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-md);
+            position: relative;
+        }
+
+        .address-card.default {
+            border: 2px solid var(--accent);
+        }
+
+        .address-card .badge {
+            position: absolute;
+            top: var(--space-md);
+            right: var(--space-md);
+            background: var(--accent);
+            color: var(--dark);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+        }
+
+        .address-card h4 {
+            margin-bottom: var(--space-sm);
+        }
+
+        .address-card p {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .address-actions {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+
+        .address-actions button {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.875rem;
+            padding: var(--space-xs) var(--space-sm);
+        }
+
+        .address-actions button.delete {
+            color: var(--error);
+        }
+
+        .add-address-btn {
+            width: 100%;
+            padding: var(--space-lg);
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius-lg);
+            background: none;
+            cursor: pointer;
+            color: var(--gray-500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            transition: var(--transition-base);
+        }
+
+        .add-address-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        @media (max-width: 1024px) {
+            .account-container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="nav-logo">
+                <h1>Nova<span>Glow</span></h1>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../catalog.html">Catalog</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="wishlist.html" class="nav-action-btn"><i class="far fa-heart"></i></a>
+                <a href="cart.html" class="nav-action-btn"><i class="fas fa-shopping-bag"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="account-page">
+        <div class="container">
+            <div class="account-container">
+                <aside class="account-sidebar">
+                    <div class="user-info">
+                        <div class="user-avatar"><i class="fas fa-user"></i></div>
+                        <h3 id="sidebar-name">Loading...</h3>
+                    </div>
+                    <nav class="sidebar-nav">
+                        <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                        <a href="profile.html" class="active"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="orders.html"><i class="fas fa-box"></i> My Orders</a>
+                        <a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="wishlist.html"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="liked.html"><i class="fas fa-thumbs-up"></i> Liked Items</a>
+                    </nav>
+                </aside>
+
+                <main class="account-main">
+                    <div class="account-header">
+                        <h2>My <span class="gold-text">Profile</span></h2>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3><i class="fas fa-user-circle"></i> Personal Information</h3>
+                        <form id="profile-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" class="form-input" id="display-name" placeholder="Your name"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-input" id="email" disabled>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-input" id="phone" placeholder="Your phone number">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Saved Addresses</h3>
+                        <div id="addresses-list"></div>
+                        <button class="add-address-btn" id="add-address-btn">
+                            <i class="fas fa-plus"></i> Add New Address
+                        </button>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Address Modal -->
+    <div class="modal-overlay" id="address-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Address</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="address-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Address Label</label>
+                            <input type="text" class="form-input" id="addr-label" placeholder="Home, Office, etc."
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" id="addr-name" placeholder="Recipient name" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-input" id="addr-phone" placeholder="Your phone number" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-input form-textarea" id="addr-address"
+                            placeholder="Street address, building, etc." required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-input" id="addr-city" placeholder="City" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">State</label>
+                            <input type="text" class="form-input" id="addr-state" placeholder="State" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Pincode</label>
+                        <input type="text" class="form-input" id="addr-pincode" placeholder="400001" required>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: var(--space-sm); cursor: pointer;">
+                            <input type="checkbox" id="addr-default" style="accent-color: var(--primary);">
+                            <span>Set as default address</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost modal-close">Cancel</button>
+                <button class="btn btn-primary" id="save-address">Save Address</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db } from '../js/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        let userData = null;
+        let currentUser = null;
+        let editingIndex = -1;
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function renderAddresses() {
+            const addresses = userData?.addresses || [];
+            const list = document.getElementById('addresses-list');
+
+            if (addresses.length === 0) {
+                list.innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: var(--space-lg);">No saved addresses yet.</p>';
+                return;
+            }
+
+            list.innerHTML = addresses.map((addr, i) => `
+                <div class="address-card ${addr.isDefault ? 'default' : ''}">
+                    ${addr.isDefault ? '<span class="badge">Default</span>' : ''}
+                    <h4>${addr.label}</h4>
+                    <p>${addr.fullName}<br>${addr.phone}<br>${addr.address}, ${addr.city}, ${addr.state} - ${addr.pincode}</p>
+                    <div class="address-actions">
+                        <button onclick="editAddress(${i})"><i class="fas fa-edit"></i> Edit</button>
+                        ${!addr.isDefault ? `<button onclick="setDefault(${i})"><i class="fas fa-star"></i> Set Default</button>` : ''}
+                        <button class="delete" onclick="deleteAddress(${i})"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.editAddress = function (index) {
+            editingIndex = index;
+            const addr = userData.addresses[index];
+            document.getElementById('modal-title').textContent = 'Edit Address';
+            document.getElementById('addr-label').value = addr.label;
+            document.getElementById('addr-name').value = addr.fullName;
+            document.getElementById('addr-phone').value = addr.phone;
+            document.getElementById('addr-address').value = addr.address;
+            document.getElementById('addr-city').value = addr.city;
+            document.getElementById('addr-state').value = addr.state;
+            document.getElementById('addr-pincode').value = addr.pincode;
+            document.getElementById('addr-default').checked = addr.isDefault;
+            document.getElementById('address-modal').classList.add('active');
+        };
+
+        window.setDefault = async function (index) {
+            const addresses = userData.addresses.map((addr, i) => ({ ...addr, isDefault: i === index }));
+            await updateDoc(doc(db, 'users', currentUser.uid), { addresses });
+            userData.addresses = addresses;
+            renderAddresses();
+            showToast('Default address updated', 'success');
+        };
+
+        window.deleteAddress = async function (index) {
+            if (!confirm('Delete this address?')) return;
+            const addresses = [...userData.addresses];
+            addresses.splice(index, 1);
+            await updateDoc(doc(db, 'users', currentUser.uid), { addresses });
+            userData.addresses = addresses;
+            renderAddresses();
+            showToast('Address deleted', 'success');
+        };
+
+        document.getElementById('add-address-btn').addEventListener('click', () => {
+            editingIndex = -1;
+            document.getElementById('modal-title').textContent = 'Add New Address';
+            document.getElementById('address-form').reset();
+            document.getElementById('address-modal').classList.add('active');
+        });
+
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('address-modal').classList.remove('active');
+            });
+        });
+
+        document.getElementById('save-address').addEventListener('click', async () => {
+            const addr = {
+                label: document.getElementById('addr-label').value.trim(),
+                fullName: document.getElementById('addr-name').value.trim(),
+                phone: document.getElementById('addr-phone').value.trim(),
+                address: document.getElementById('addr-address').value.trim(),
+                city: document.getElementById('addr-city').value.trim(),
+                state: document.getElementById('addr-state').value.trim(),
+                pincode: document.getElementById('addr-pincode').value.trim(),
+                isDefault: document.getElementById('addr-default').checked
+            };
+
+            if (!addr.label || !addr.fullName || !addr.phone || !addr.address || !addr.city || !addr.state || !addr.pincode) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+
+            let addresses = [...(userData.addresses || [])];
+
+            if (addr.isDefault) {
+                addresses = addresses.map(a => ({ ...a, isDefault: false }));
+            }
+
+            if (editingIndex >= 0) {
+                addresses[editingIndex] = addr;
+            } else {
+                addresses.push(addr);
+            }
+
+            await updateDoc(doc(db, 'users', currentUser.uid), { addresses });
+            userData.addresses = addresses;
+            renderAddresses();
+            document.getElementById('address-modal').classList.remove('active');
+            showToast(editingIndex >= 0 ? 'Address updated' : 'Address added', 'success');
+        });
+
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const displayName = document.getElementById('display-name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            await updateDoc(doc(db, 'users', currentUser.uid), { displayName, phone });
+            userData.displayName = displayName;
+            userData.phone = phone;
+            document.getElementById('sidebar-name').textContent = displayName;
+            showToast('Profile updated!', 'success');
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+            currentUser = user;
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                userData = userDoc.data();
+                document.getElementById('sidebar-name').textContent = userData.displayName || 'User';
+                document.getElementById('display-name').value = userData.displayName || '';
+                document.getElementById('email').value = user.email;
+                document.getElementById('phone').value = userData.phone || '';
+                renderAddresses();
+            }
+        });
+    </script>
+</body>
+
+</html>

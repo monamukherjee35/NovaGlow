@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inquiries - NovaGlow Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h1>Nova<span>Glow</span></h1>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-section-title">Main</span>
+                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="products.html"><i class="fas fa-gem"></i> Products</a>
+                    <a href="inquiries.html" class="active"><i class="fas fa-envelope"></i> Inquiries</a>
+                </div>
+                <div class="nav-section">
+                    <span class="nav-section-title">Management</span>
+                    <a href="users.html"><i class="fas fa-users"></i> Customers</a>
+                    <a href="categories.html"><i class="fas fa-tags"></i> Categories</a>
+                </div>
+                <div class="nav-section">
+                    <a href="../index.html"><i class="fas fa-store"></i> View Store</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Customer Inquiries</h1>
+                <div class="admin-header-actions">
+                    <button class="btn btn-outline btn-sm" id="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="filters-bar">
+                <div class="search-input">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search by customer or product...">
+                </div>
+                <select class="filter-select" id="status-filter">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+
+            <div class="admin-card">
+                <div class="card-body" style="padding: 0;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Contact</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inquiries-table">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>No inquiries yet</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Inquiry Detail Modal -->
+    <div class="modal-overlay" id="inquiry-modal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Inquiry Details</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="display: grid; gap: var(--space-lg);">
+                    <div
+                        style="background: var(--gray-100); padding: var(--space-lg); border-radius: var(--radius-md);">
+                        <h4 style="margin-bottom: var(--space-md); color: var(--primary);">Product Information</h4>
+                        <p><strong>Product:</strong> <span id="detail-product"></span></p>
+                        <p><strong>Price:</strong> <span id="detail-price"></span></p>
+                        <p><strong>Quantity:</strong> <span id="detail-quantity"></span></p>
+                    </div>
+                    <div
+                        style="background: var(--gray-100); padding: var(--space-lg); border-radius: var(--radius-md);">
+                        <h4 style="margin-bottom: var(--space-md); color: var(--primary);">Customer Information</h4>
+                        <p><strong>Name:</strong> <span id="detail-name"></span></p>
+                        <p><strong>Email:</strong> <span id="detail-email"></span></p>
+                        <p><strong>Phone:</strong> <span id="detail-phone"></span></p>
+                    </div>
+                    <div
+                        style="background: var(--gray-100); padding: var(--space-lg); border-radius: var(--radius-md);">
+                        <h4 style="margin-bottom: var(--space-md); color: var(--primary);">Delivery Address</h4>
+                        <p id="detail-address"></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Update Status</label>
+                        <select class="form-input form-select" id="detail-status">
+                            <option value="pending">Pending</option>
+                            <option value="contacted">Contacted</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost modal-close">Close</button>
+                <button class="btn btn-primary" id="update-status">Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db, ADMIN_EMAIL } from '../js/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { collection, getDocs, updateDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        let inquiries = [];
+        let currentInquiryId = null;
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(price);
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'N/A';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function loadInquiries() {
+            try {
+                const q = query(collection(db, 'inquiries'), orderBy('createdAt', 'desc'));
+                const snapshot = await getDocs(q);
+                inquiries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderInquiries();
+            } catch (error) {
+                console.error('Error loading inquiries:', error);
+            }
+        }
+
+        function renderInquiries(filter = '', status = '') {
+            const filtered = inquiries.filter(inq => {
+                const matchesSearch =
+                    inq.customerName?.toLowerCase().includes(filter.toLowerCase()) ||
+                    inq.productName?.toLowerCase().includes(filter.toLowerCase());
+                const matchesStatus = !status || inq.status === status;
+                return matchesSearch && matchesStatus;
+            });
+
+            const tbody = document.getElementById('inquiries-table');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No inquiries found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(inq => `
+                <tr>
+                    <td>
+                        <div>
+                            <strong>${inq.customerName}</strong>
+                            <p style="font-size: 0.8rem; color: var(--gray-500);">${inq.customerEmail}</p>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>${inq.productName || 'Product'}</strong>
+                            <p style="font-size: 0.8rem; color: var(--gray-500);">${formatPrice(inq.productPrice || 0)}</p>
+                        </div>
+                    </td>
+                    <td style="font-size: 0.9rem;">${inq.customerPhone}</td>
+                    <td>${formatDate(inq.createdAt)}</td>
+                    <td><span class="status-badge ${inq.status}">${inq.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn view-btn" data-id="${inq.id}"><i class="fas fa-eye"></i></button>
+                            <a href="mailto:${inq.customerEmail}" class="action-btn"><i class="fas fa-envelope"></i></a>
+                            <a href="tel:${inq.customerPhone}" class="action-btn"><i class="fas fa-phone"></i></a>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => viewInquiry(btn.dataset.id));
+            });
+        }
+
+        function viewInquiry(id) {
+            currentInquiryId = id;
+            const inq = inquiries.find(i => i.id === id);
+            if (!inq) return;
+
+            document.getElementById('detail-product').textContent = inq.productName || 'Product';
+            document.getElementById('detail-price').textContent = formatPrice(inq.productPrice || 0);
+            document.getElementById('detail-quantity').textContent = inq.quantity || 1;
+            document.getElementById('detail-name').textContent = inq.customerName;
+            document.getElementById('detail-email').textContent = inq.customerEmail;
+            document.getElementById('detail-phone').textContent = inq.customerPhone;
+            document.getElementById('detail-address').textContent = inq.deliveryAddress;
+            document.getElementById('detail-status').value = inq.status;
+
+            document.getElementById('inquiry-modal').classList.add('active');
+        }
+
+        document.getElementById('update-status').addEventListener('click', async () => {
+            const newStatus = document.getElementById('detail-status').value;
+
+            try {
+                await updateDoc(doc(db, 'inquiries', currentInquiryId), { status: newStatus });
+
+                const index = inquiries.findIndex(i => i.id === currentInquiryId);
+                if (index !== -1) inquiries[index].status = newStatus;
+
+                renderInquiries();
+                document.getElementById('inquiry-modal').classList.remove('active');
+                showToast('Status updated', 'success');
+            } catch (error) {
+                showToast('Error updating status', 'error');
+            }
+        });
+
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('inquiry-modal').classList.remove('active');
+            });
+        });
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            renderInquiries(e.target.value, document.getElementById('status-filter').value);
+        });
+
+        document.getElementById('status-filter').addEventListener('change', (e) => {
+            renderInquiries(document.getElementById('search-input').value, e.target.value);
+        });
+
+        document.getElementById('refresh-btn').addEventListener('click', loadInquiries);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email !== ADMIN_EMAIL) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+            loadInquiries();
+        });
+    </script>
+</body>
+
+</html>

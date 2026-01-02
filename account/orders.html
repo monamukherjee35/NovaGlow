@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - NovaGlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .account-page {
+            padding-top: 100px;
+            min-height: 100vh;
+            background: var(--background-alt);
+        }
+
+        .account-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-xl);
+            padding: var(--space-2xl) 0;
+        }
+
+        .account-sidebar {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+        }
+
+        .user-info {
+            text-align: center;
+            padding-bottom: var(--space-xl);
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: var(--space-lg);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-md);
+            color: white;
+            font-size: 2rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            color: var(--dark);
+            transition: var(--transition-base);
+            margin-bottom: var(--space-xs);
+        }
+
+        .sidebar-nav a:hover {
+            background: var(--gray-100);
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(74, 14, 78, 0.1);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .account-main {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .order-card {
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .order-date {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        .order-status {
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .order-status.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: #D97706;
+        }
+
+        .order-status.contacted {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563EB;
+        }
+
+        .order-status.completed {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .order-product {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+        }
+
+        .order-product img {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+        }
+
+        .order-product h4 {
+            margin-bottom: var(--space-xs);
+        }
+
+        .order-product p {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        .order-product .price {
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: var(--space-xs);
+        }
+
+        .order-details {
+            margin-top: var(--space-md);
+            padding-top: var(--space-md);
+            border-top: 1px solid var(--gray-200);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+            font-size: 0.875rem;
+        }
+
+        .order-details strong {
+            color: var(--gray-600);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--space-3xl);
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gray-300);
+            margin-bottom: var(--space-lg);
+        }
+
+        @media (max-width: 1024px) {
+            .account-container {
+                grid-template-columns: 1fr;
+            }
+
+            .order-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="nav-logo">
+                <h1>Nova<span>Glow</span></h1>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../catalog.html">Catalog</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="wishlist.html" class="nav-action-btn"><i class="far fa-heart"></i></a>
+                <a href="cart.html" class="nav-action-btn"><i class="fas fa-shopping-bag"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="account-page">
+        <div class="container">
+            <div class="account-container">
+                <aside class="account-sidebar">
+                    <div class="user-info">
+                        <div class="user-avatar"><i class="fas fa-user"></i></div>
+                        <h3 id="user-name">Loading...</h3>
+                    </div>
+                    <nav class="sidebar-nav">
+                        <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                        <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="orders.html" class="active"><i class="fas fa-box"></i> My Orders</a>
+                        <a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="wishlist.html"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="liked.html"><i class="fas fa-thumbs-up"></i> Liked Items</a>
+                    </nav>
+                </aside>
+
+                <main class="account-main">
+                    <div class="account-header">
+                        <h2>My <span class="gold-text">Orders</span></h2>
+                        <span id="order-count">0 orders</span>
+                    </div>
+
+                    <div id="orders-list">
+                        <div class="empty-state" id="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <h3>No orders yet</h3>
+                            <p>Start shopping to see your orders here!</p>
+                            <a href="../catalog.html" class="btn btn-accent" style="margin-top: var(--space-lg);">Shop
+                                Now</a>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db } from '../js/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { doc, getDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(price);
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'N/A';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        async function loadOrders(userId) {
+            const ordersQuery = query(
+                collection(db, 'orders'),
+                where('userId', '==', userId),
+                orderBy('createdAt', 'desc')
+            );
+
+            const snapshot = await getDocs(ordersQuery);
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        }
+
+        function renderOrders(orders) {
+            const list = document.getElementById('orders-list');
+            const emptyState = document.getElementById('empty-state');
+
+            if (orders.length === 0) {
+                list.innerHTML = '';
+                list.appendChild(emptyState);
+                emptyState.style.display = 'block';
+                document.getElementById('order-count').textContent = '0 orders';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            document.getElementById('order-count').textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''}`;
+
+            list.innerHTML = orders.map(order => {
+                const statusText = (order.status || 'pending').replace('_', ' ');
+                return `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-id">Order #${order.id.substring(0, 8).toUpperCase()}</span>
+                                <span class="order-date">${formatDate(order.createdAt)}</span>
+                            </div>
+                            <span class="order-status ${order.status}">${statusText}</span>
+                        </div>
+                        <div class="order-product">
+                            <img src="${order.productImage || 'https://via.placeholder.com/80x80?text=Product'}" alt="${order.productName}" onerror="this.src='https://via.placeholder.com/80x80?text=Product'">
+                            <div>
+                                <h4>${order.productName}</h4>
+                                <p>Quantity: ${order.quantity || 1}</p>
+                                <p class="price">${formatPrice(order.productPrice * (order.quantity || 1))}</p>
+                            </div>
+                        </div>
+                        <div class="order-details">
+                            <div>
+                                <strong>Delivery Address:</strong>
+                                <p>${order.deliveryAddress}</p>
+                            </div>
+                            <div>
+                                <strong>Contact:</strong>
+                                <p>${order.customerName}<br>${order.customerPhone}<br>${order.customerEmail}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                document.getElementById('user-name').textContent = userDoc.data().displayName || 'User';
+            }
+
+            const orders = await loadOrders(user.uid);
+            renderOrders(orders);
+        });
+    </script>
+</body>
+
+</html>

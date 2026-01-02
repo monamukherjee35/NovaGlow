@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart - NovaGlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .account-page {
+            padding-top: 100px;
+            min-height: 100vh;
+            background: var(--background-alt);
+        }
+
+        .account-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-xl);
+            padding: var(--space-2xl) 0;
+        }
+
+        .account-sidebar {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .user-info {
+            text-align: center;
+            padding-bottom: var(--space-xl);
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: var(--space-lg);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-md);
+            color: white;
+            font-size: 2rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            color: var(--dark);
+            transition: var(--transition-base);
+            margin-bottom: var(--space-xs);
+        }
+
+        .sidebar-nav a:hover {
+            background: var(--gray-100);
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(74, 14, 78, 0.1);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .account-main {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 100px 1fr auto auto;
+            gap: var(--space-lg);
+            align-items: center;
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .cart-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+        }
+
+        .cart-item-info h4 {
+            margin-bottom: var(--space-xs);
+        }
+
+        .cart-item-info p {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        .cart-item-price {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .quantity-controls button {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-100);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+
+        .quantity-controls input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            padding: var(--space-xs);
+        }
+
+        .remove-btn {
+            color: var(--error);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: var(--space-sm);
+        }
+
+        .cart-summary {
+            margin-top: var(--space-xl);
+            padding: var(--space-xl);
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-md);
+        }
+
+        .summary-row.total {
+            font-size: 1.25rem;
+            font-weight: 600;
+            border-top: 2px solid var(--gray-300);
+            padding-top: var(--space-md);
+            margin-top: var(--space-md);
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: var(--space-3xl);
+            color: var(--gray-500);
+        }
+
+        .empty-cart i {
+            font-size: 4rem;
+            color: var(--gray-300);
+            margin-bottom: var(--space-lg);
+        }
+
+        @media (max-width: 1024px) {
+            .account-container {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-item {
+                grid-template-columns: 80px 1fr;
+                gap: var(--space-md);
+            }
+
+            .cart-item-price,
+            .quantity-controls,
+            .remove-btn {
+                grid-column: 2;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="nav-logo">
+                <h1>Nova<span>Glow</span></h1>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../catalog.html">Catalog</a></li>
+                <li><a href="../about.html">About</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="wishlist.html" class="nav-action-btn"><i class="far fa-heart"></i></a>
+                <a href="cart.html" class="nav-action-btn"><i class="fas fa-shopping-bag"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="account-page">
+        <div class="container">
+            <div class="account-container">
+                <aside class="account-sidebar">
+                    <div class="user-info">
+                        <div class="user-avatar"><i class="fas fa-user"></i></div>
+                        <h3 id="user-name">Loading...</h3>
+                    </div>
+                    <nav class="sidebar-nav">
+                        <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                        <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="orders.html"><i class="fas fa-box"></i> My Orders</a>
+                        <a href="cart.html" class="active"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="wishlist.html"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="liked.html"><i class="fas fa-thumbs-up"></i> Liked Items</a>
+                    </nav>
+                </aside>
+
+                <main class="account-main">
+                    <div class="account-header">
+                        <h2>My <span class="gold-text">Cart</span></h2>
+                        <span id="cart-count-text">0 items</span>
+                    </div>
+
+                    <div id="cart-items">
+                        <div class="empty-cart" id="empty-cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h3>Your cart is empty</h3>
+                            <p>Looks like you haven't added anything yet.</p>
+                            <a href="../catalog.html" class="btn btn-accent" style="margin-top: var(--space-lg);">Start
+                                Shopping</a>
+                        </div>
+                    </div>
+
+                    <div class="cart-summary" id="cart-summary" style="display: none;">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span id="subtotal">₹0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span>Free</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span id="total">₹0</span>
+                        </div>
+                        <button class="btn btn-accent btn-lg" style="width: 100%; margin-top: var(--space-lg);"
+                            id="checkout-btn">
+                            <i class="fas fa-shopping-bag"></i> Proceed to Checkout
+                        </button>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db } from '../js/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        let userData = null;
+        let currentUser = null;
+        let productsCache = {};
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(price);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function loadProducts() {
+            const snapshot = await getDocs(collection(db, 'products'));
+            snapshot.forEach(doc => {
+                productsCache[doc.id] = { id: doc.id, ...doc.data() };
+            });
+        }
+
+        async function renderCart() {
+            const cartItems = userData?.cart || [];
+            const container = document.getElementById('cart-items');
+            const emptyCart = document.getElementById('empty-cart');
+            const summary = document.getElementById('cart-summary');
+
+            if (cartItems.length === 0) {
+                container.innerHTML = '';
+                container.appendChild(emptyCart);
+                emptyCart.style.display = 'block';
+                summary.style.display = 'none';
+                document.getElementById('cart-count-text').textContent = '0 items';
+                return;
+            }
+
+            emptyCart.style.display = 'none';
+            summary.style.display = 'block';
+            document.getElementById('cart-count-text').textContent = `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''}`;
+
+            let subtotal = 0;
+            const itemsHtml = [];
+
+            for (let i = 0; i < cartItems.length; i++) {
+                const item = cartItems[i];
+                let product = productsCache[item.productId];
+
+                // Fetch if not in cache
+                if (!product) {
+                    const productDoc = await getDoc(doc(db, 'products', item.productId));
+                    if (productDoc.exists()) {
+                        product = { id: productDoc.id, ...productDoc.data() };
+                        productsCache[item.productId] = product;
+                    }
+                }
+
+                if (!product) continue;
+
+                subtotal += product.price * (item.quantity || 1);
+                itemsHtml.push(`
+                    <div class="cart-item" data-index="${i}">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/100x100?text=Product'">
+                        <div class="cart-item-info">
+                            <h4>${product.name}</h4>
+                            <p>${product.category || 'Jewelry'}</p>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="qty-decrease" data-index="${i}">-</button>
+                            <input type="number" value="${item.quantity || 1}" min="1" readonly>
+                            <button class="qty-increase" data-index="${i}">+</button>
+                        </div>
+                        <div class="cart-item-price">${formatPrice(product.price * (item.quantity || 1))}</div>
+                        <button class="remove-btn" data-index="${i}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `);
+            }
+
+            container.innerHTML = itemsHtml.join('');
+            document.getElementById('subtotal').textContent = formatPrice(subtotal);
+            document.getElementById('total').textContent = formatPrice(subtotal);
+
+            // Attach event listeners
+            document.querySelectorAll('.qty-decrease').forEach(btn => {
+                btn.addEventListener('click', () => updateQuantity(parseInt(btn.dataset.index), -1));
+            });
+            document.querySelectorAll('.qty-increase').forEach(btn => {
+                btn.addEventListener('click', () => updateQuantity(parseInt(btn.dataset.index), 1));
+            });
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', () => removeItem(parseInt(btn.dataset.index)));
+            });
+        }
+
+        async function updateQuantity(index, change) {
+            const cart = [...userData.cart];
+            cart[index].quantity = Math.max(1, (cart[index].quantity || 1) + change);
+            await updateDoc(doc(db, 'users', currentUser.uid), { cart });
+            userData.cart = cart;
+            renderCart();
+        }
+
+        async function removeItem(index) {
+            const cart = [...userData.cart];
+            cart.splice(index, 1);
+            await updateDoc(doc(db, 'users', currentUser.uid), { cart });
+            userData.cart = cart;
+            renderCart();
+            showToast('Item removed from cart', 'success');
+        }
+
+        document.getElementById('checkout-btn')?.addEventListener('click', () => {
+            window.location.href = '../catalog.html';
+            showToast('Visit a product page and click "Buy Now" to place an order', 'info');
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+            currentUser = user;
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                userData = userDoc.data();
+                document.getElementById('user-name').textContent = userData.displayName || 'User';
+                renderCart();
+            }
+        });
+    </script>
+</body>
+
+</html>

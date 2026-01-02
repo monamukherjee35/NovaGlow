@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liked Items - NovaGlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .account-page {
+            padding-top: 100px;
+            min-height: 100vh;
+            background: var(--background-alt);
+        }
+
+        .account-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-xl);
+            padding: var(--space-2xl) 0;
+        }
+
+        .account-sidebar {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+        }
+
+        .user-info {
+            text-align: center;
+            padding-bottom: var(--space-xl);
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: var(--space-lg);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-md);
+            color: white;
+            font-size: 2rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            color: var(--dark);
+            transition: var(--transition-base);
+            margin-bottom: var(--space-xs);
+        }
+
+        .sidebar-nav a:hover {
+            background: var(--gray-100);
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(74, 14, 78, 0.1);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .account-main {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .liked-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-lg);
+        }
+
+        .liked-item {
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .liked-item img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+
+        .liked-item-info {
+            padding: var(--space-md);
+        }
+
+        .liked-item h4 {
+            font-size: 0.9rem;
+            margin-bottom: var(--space-xs);
+        }
+
+        .liked-item p {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .unlike-btn {
+            position: absolute;
+            top: var(--space-sm);
+            right: var(--space-sm);
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            color: var(--error);
+            border: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--space-3xl);
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gray-300);
+            margin-bottom: var(--space-lg);
+        }
+
+        @media (max-width: 1024px) {
+            .account-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="nav-logo">
+                <h1>Nova<span>Glow</span></h1>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../catalog.html">Catalog</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="wishlist.html" class="nav-action-btn"><i class="far fa-heart"></i></a>
+                <a href="cart.html" class="nav-action-btn"><i class="fas fa-shopping-bag"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="account-page">
+        <div class="container">
+            <div class="account-container">
+                <aside class="account-sidebar">
+                    <div class="user-info">
+                        <div class="user-avatar"><i class="fas fa-user"></i></div>
+                        <h3 id="user-name">Loading...</h3>
+                    </div>
+                    <nav class="sidebar-nav">
+                        <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                        <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="orders.html"><i class="fas fa-box"></i> My Orders</a>
+                        <a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="wishlist.html"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="liked.html" class="active"><i class="fas fa-thumbs-up"></i> Liked Items</a>
+                    </nav>
+                </aside>
+
+                <main class="account-main">
+                    <div class="account-header">
+                        <h2>Liked <span class="gold-text">Items</span></h2>
+                        <span id="liked-count">0 items</span>
+                    </div>
+
+                    <div class="liked-grid" id="liked-grid">
+                        <div class="empty-state" id="empty-state">
+                            <i class="far fa-thumbs-up"></i>
+                            <h3>No liked items yet</h3>
+                            <p>Like products you love!</p>
+                            <a href="../catalog.html" class="btn btn-accent" style="margin-top: var(--space-lg);">Browse
+                                Products</a>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db } from '../js/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { doc, getDoc, updateDoc, arrayRemove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        let userData = null;
+        let currentUser = null;
+        let productsCache = {};
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(price);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function renderLiked() {
+            const liked = userData?.liked || [];
+            const grid = document.getElementById('liked-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            if (liked.length === 0) {
+                grid.innerHTML = '';
+                grid.appendChild(emptyState);
+                emptyState.style.display = 'block';
+                document.getElementById('liked-count').textContent = '0 items';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            document.getElementById('liked-count').textContent = `${liked.length} item${liked.length !== 1 ? 's' : ''}`;
+
+            const itemsHtml = [];
+            for (const productId of liked) {
+                let product = productsCache[productId];
+
+                if (!product) {
+                    const productDoc = await getDoc(doc(db, 'products', productId));
+                    if (productDoc.exists()) {
+                        product = { id: productDoc.id, ...productDoc.data() };
+                        productsCache[productId] = product;
+                    }
+                }
+
+                if (!product) continue;
+
+                itemsHtml.push(`
+                    <div class="liked-item">
+                        <button class="unlike-btn" data-id="${productId}"><i class="fas fa-times"></i></button>
+                        <a href="../product.html?id=${productId}">
+                            <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200x200?text=Product'">
+                        </a>
+                        <div class="liked-item-info">
+                            <h4>${product.name}</h4>
+                            <p>${formatPrice(product.price)}</p>
+                        </div>
+                    </div>
+                `);
+            }
+
+            grid.innerHTML = itemsHtml.join('');
+
+            document.querySelectorAll('.unlike-btn').forEach(btn => {
+                btn.addEventListener('click', () => unlike(btn.dataset.id));
+            });
+        }
+
+        async function unlike(productId) {
+            await updateDoc(doc(db, 'users', currentUser.uid), { liked: arrayRemove(productId) });
+            userData.liked = userData.liked.filter(id => id !== productId);
+            renderLiked();
+            showToast('Unliked', 'success');
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+            currentUser = user;
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                userData = userDoc.data();
+                document.getElementById('user-name').textContent = userData.displayName || 'User';
+                renderLiked();
+            }
+        });
+    </script>
+</body>
+
+</html>
