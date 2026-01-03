@@ -57,24 +57,14 @@
             gap: var(--space-sm);
         }
 
-        .status-badge.pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-badge.approved {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-badge.payment_sent {
-            background: #e0e7ff;
-            color: #3730a3;
-        }
-
         .status-badge.paid {
             background: #d1fae5;
             color: #065f46;
+        }
+
+        .status-badge.processing {
+            background: #dbeafe;
+            color: #1e40af;
         }
 
         .status-badge.shipped {
@@ -136,10 +126,8 @@
                 </div>
                 <select class="filter-select" id="status-filter">
                     <option value="">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="payment_sent">Payment Link Sent</option>
                     <option value="paid">Paid</option>
+                    <option value="processing">Processing</option>
                     <option value="shipped">Shipped</option>
                     <option value="delivered">Delivered</option>
                     <option value="cancelled">Cancelled</option>
@@ -151,7 +139,7 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>Customer</th>
+                                <th>Order #</th>
                                 <th>Product</th>
                                 <th>Contact</th>
                                 <th>Date</th>
@@ -209,14 +197,25 @@
                         <p id="detail-address"></p>
                     </div>
 
+                    <!-- Payment Information -->
+                    <div
+                        style="background: var(--gray-100); padding: var(--space-lg); border-radius: var(--radius-md);">
+                        <h4 style="margin-bottom: var(--space-md); color: var(--primary);">Payment Information</h4>
+                        <p><strong>Status:</strong> <span id="detail-payment-status" class="status-badge"
+                                style="font-size: 0.8rem;"></span></p>
+                        <p><strong>Payment ID:</strong> <span id="detail-payment-id"></span></p>
+                        <p><strong>Method:</strong> <span id="detail-payment-method"
+                                style="text-transform: capitalize;"></span></p>
+                        <p><strong>Total Amount:</strong> <span id="detail-total-amount"
+                                style="font-weight: bold; color: var(--primary);"></span></p>
+                    </div>
+
                     <!-- Order Workflow -->
                     <div class="action-section">
                         <h4>Order Status Workflow</h4>
                         <div class="order-workflow" id="workflow-steps">
-                            <span class="workflow-step" data-step="pending">Pending</span>
-                            <span class="workflow-step" data-step="approved">Approved</span>
-                            <span class="workflow-step" data-step="payment_sent">Payment Sent</span>
                             <span class="workflow-step" data-step="paid">Paid</span>
+                            <span class="workflow-step" data-step="processing">Processing</span>
                             <span class="workflow-step" data-step="shipped">Shipped</span>
                             <span class="workflow-step" data-step="delivered">Delivered</span>
                         </div>
@@ -228,20 +227,31 @@
                         <div class="form-group">
                             <label class="form-label">Update Order Status</label>
                             <select class="form-input form-select" id="detail-status">
-                                <option value="pending">Pending - Awaiting Review</option>
-                                <option value="approved">Approved - Ready for Payment</option>
-                                <option value="payment_sent">Payment Link Sent</option>
                                 <option value="paid">Paid - Payment Received</option>
+                                <option value="processing">Processing - Preparing Order</option>
                                 <option value="shipped">Shipped - In Transit</option>
                                 <option value="delivered">Delivered - Completed</option>
                                 <option value="cancelled">Cancelled</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Payment Link (optional)</label>
-                            <input type="url" class="form-input" id="payment-link"
-                                placeholder="https://payment-link.com/...">
+
+                        <!-- Shipping Tracking Section -->
+                        <div
+                            style="background: var(--gray-100); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-md);">
+                            <label class="form-label" style="margin-bottom: var(--space-md);"><i
+                                    class="fas fa-shipping-fast"></i> Shipping Tracking</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label">AWB Number</label>
+                                    <input type="text" class="form-input" id="awb-number" placeholder="e.g. 1234567890">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label">Tracking Link</label>
+                                    <input type="url" class="form-input" id="tracking-link" placeholder="https://...">
+                                </div>
+                            </div>
                         </div>
+
                         <div class="form-group">
                             <label class="form-label">Admin Notes</label>
                             <textarea class="form-input form-textarea" id="admin-notes"
@@ -271,7 +281,7 @@
 
         let orders = [];
         let currentOrderId = null;
-        const statusOrder = ['pending', 'approved', 'payment_sent', 'paid', 'shipped', 'delivered'];
+        const statusOrder = ['paid', 'processing', 'shipped', 'delivered'];
 
         function formatPrice(price) {
             return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(price);
@@ -334,19 +344,19 @@
                 <tr>
                     <td>
                         <div>
-                            <strong>${order.customerName}</strong>
-                            <p style="font-size: 0.8rem; color: var(--gray-500);">${order.customerEmail}</p>
+                            <strong>${order.orderNumber || '-'}</strong>
+                            <p style="font-size: 0.8rem; color: var(--gray-500);">${order.customerName}</p>
                         </div>
                     </td>
                     <td>
                         <div>
                             <strong>${order.productName || 'Product'}</strong>
-                            <p style="font-size: 0.8rem; color: var(--gray-500);">${formatPrice(order.productPrice || 0)}</p>
+                            <p style="font-size: 0.8rem; color: var(--gray-500);">${formatPrice(order.totalAmount || order.productPrice || 0)}</p>
                         </div>
                     </td>
                     <td style="font-size: 0.9rem;">${order.customerPhone}</td>
                     <td>${formatDate(order.createdAt)}</td>
-                    <td><span class="status-badge ${order.status}">${order.status?.replace('_', ' ') || 'pending'}</span></td>
+                    <td><span class="status-badge ${order.status}">${order.status?.replace('_', ' ') || 'paid'}</span></td>
                     <td>
                         <div class="action-buttons">
                             <button class="action-btn view-btn" data-id="${order.id}"><i class="fas fa-eye"></i></button>
@@ -388,26 +398,37 @@
             document.getElementById('detail-email').textContent = order.customerEmail;
             document.getElementById('detail-phone').textContent = order.customerPhone;
             document.getElementById('detail-address').textContent = order.deliveryAddress;
-            document.getElementById('detail-status').value = order.status || 'pending';
-            document.getElementById('payment-link').value = order.paymentLink || '';
+            document.getElementById('detail-status').value = order.status || 'paid';
             document.getElementById('admin-notes').value = order.adminNotes || '';
+            document.getElementById('awb-number').value = order.awbNumber || '';
+            document.getElementById('tracking-link').value = order.trackingLink || '';
 
-            updateWorkflowSteps(order.status || 'pending');
+            // Populate Payment Info
+            const paymentStatus = order.paymentStatus || 'paid';
+            document.getElementById('detail-payment-status').textContent = paymentStatus.toUpperCase();
+            document.getElementById('detail-payment-status').className = `status-badge ${paymentStatus}`;
+            document.getElementById('detail-payment-id').textContent = order.paymentId || 'N/A';
+            document.getElementById('detail-payment-method').textContent = order.paymentMethod || 'online';
+            document.getElementById('detail-total-amount').textContent = formatPrice((order.totalAmount || order.productPrice) || 0);
+
+            updateWorkflowSteps(order.status || 'paid');
             document.getElementById('order-modal').classList.add('active');
         }
 
         document.getElementById('update-order').addEventListener('click', async () => {
             const newStatus = document.getElementById('detail-status').value;
-            const paymentLink = document.getElementById('payment-link').value;
             const adminNotes = document.getElementById('admin-notes').value;
+            const awbNumber = document.getElementById('awb-number').value.trim();
+            const trackingLink = document.getElementById('tracking-link').value.trim();
             const order = orders.find(o => o.id === currentOrderId);
 
             try {
                 // Update order
                 await updateDoc(doc(db, 'orders', currentOrderId), {
                     status: newStatus,
-                    paymentLink: paymentLink,
                     adminNotes: adminNotes,
+                    awbNumber: awbNumber,
+                    trackingLink: trackingLink,
                     updatedAt: new Date()
                 });
 
@@ -422,11 +443,16 @@
                 const index = orders.findIndex(o => o.id === currentOrderId);
                 if (index !== -1) {
                     orders[index].status = newStatus;
-                    orders[index].paymentLink = paymentLink;
                     orders[index].adminNotes = adminNotes;
+                    orders[index].awbNumber = awbNumber;
+                    orders[index].trackingLink = trackingLink;
                 }
 
-                renderOrders();
+                // Re-render with current filter values
+                const currentSearch = document.getElementById('search-input').value;
+                const currentStatusFilter = document.getElementById('status-filter').value;
+                renderOrders(currentSearch, currentStatusFilter);
+
                 document.getElementById('order-modal').classList.remove('active');
                 showToast('Order updated successfully', 'success');
             } catch (error) {

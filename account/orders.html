@@ -125,19 +125,29 @@
             text-transform: uppercase;
         }
 
-        .order-status.pending {
-            background: rgba(245, 158, 11, 0.1);
-            color: #D97706;
+        .order-status.paid {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
         }
 
-        .order-status.contacted {
+        .order-status.processing {
             background: rgba(59, 130, 246, 0.1);
             color: #2563EB;
         }
 
-        .order-status.completed {
-            background: rgba(16, 185, 129, 0.1);
-            color: #059669;
+        .order-status.shipped {
+            background: rgba(168, 85, 247, 0.1);
+            color: #7C3AED;
+        }
+
+        .order-status.delivered {
+            background: rgba(16, 185, 129, 0.2);
+            color: #047857;
+        }
+
+        .order-status.cancelled {
+            background: rgba(239, 68, 68, 0.1);
+            color: #DC2626;
         }
 
         .order-product {
@@ -279,14 +289,36 @@
         }
 
         async function loadOrders(userId) {
-            const ordersQuery = query(
-                collection(db, 'orders'),
-                where('userId', '==', userId),
-                orderBy('createdAt', 'desc')
-            );
+            try {
+                const ordersQuery = query(
+                    collection(db, 'orders'),
+                    where('userId', '==', userId),
+                    orderBy('createdAt', 'desc')
+                );
 
-            const snapshot = await getDocs(ordersQuery);
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const snapshot = await getDocs(ordersQuery);
+                return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                // If index not ready, try without orderBy
+                try {
+                    const fallbackQuery = query(
+                        collection(db, 'orders'),
+                        where('userId', '==', userId)
+                    );
+                    const snapshot = await getDocs(fallbackQuery);
+                    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Sort client-side
+                    return orders.sort((a, b) => {
+                        const dateA = a.createdAt?.toDate?.() || new Date(0);
+                        const dateB = b.createdAt?.toDate?.() || new Date(0);
+                        return dateB - dateA;
+                    });
+                } catch (fallbackError) {
+                    console.error('Fallback query also failed:', fallbackError);
+                    return [];
+                }
+            }
         }
 
         function renderOrders(orders) {
@@ -305,34 +337,46 @@
             document.getElementById('order-count').textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''}`;
 
             list.innerHTML = orders.map(order => {
-                const statusText = (order.status || 'pending').replace('_', ' ');
+                const statusText = (order.status || 'paid').replace('_', ' ');
+                const orderNum = order.orderNumber || `#ORD-${order.id.substring(0, 6).toUpperCase()}`;
+                const totalAmount = order.totalAmount || (order.productPrice * (order.quantity || 1));
                 return `
                     <div class="order-card">
                         <div class="order-header">
                             <div>
-                                <span class="order-id">Order #${order.id.substring(0, 8).toUpperCase()}</span>
+                                <span class="order-id">${orderNum}</span>
                                 <span class="order-date">${formatDate(order.createdAt)}</span>
                             </div>
-                            <span class="order-status ${order.status}">${statusText}</span>
+                            <span class="order-status ${order.status || 'paid'}">${statusText}</span>
                         </div>
                         <div class="order-product">
                             <img src="${order.productImage || 'https://via.placeholder.com/80x80?text=Product'}" alt="${order.productName}" onerror="this.src='https://via.placeholder.com/80x80?text=Product'">
                             <div>
                                 <h4>${order.productName}</h4>
                                 <p>Quantity: ${order.quantity || 1}</p>
-                                <p class="price">${formatPrice(order.productPrice * (order.quantity || 1))}</p>
+                                <p class="price">${formatPrice(totalAmount)}</p>
                             </div>
                         </div>
                         <div class="order-details">
                             <div>
                                 <strong>Delivery Address:</strong>
-                                <p>${order.deliveryAddress}</p>
+                                <p>${order.deliveryAddress || 'N/A'}</p>
                             </div>
                             <div>
-                                <strong>Contact:</strong>
-                                <p>${order.customerName}<br>${order.customerPhone}<br>${order.customerEmail}</p>
+                                <strong>Payment:</strong>
+                                <p style="color: var(--success); font-weight: 500;">
+                                    <i class="fas fa-check-circle"></i> ${order.paymentStatus === 'paid' ? 'Paid Online' : (order.paymentId ? 'Paid' : 'Pending')}
+                                </p>
                             </div>
                         </div>
+                        ${order.awbNumber || order.trackingLink ? `
+                        <div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--gray-200);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-sm);">
+                                ${order.awbNumber ? `<div><strong>AWB:</strong> <span style="font-family: monospace; color: var(--primary);">${order.awbNumber}</span></div>` : ''}
+                                ${order.trackingLink ? `<a href="${order.trackingLink}" target="_blank" class="btn btn-sm btn-outline" style="font-size: 0.8rem;"><i class="fas fa-map-marker-alt"></i> Track Order</a>` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');

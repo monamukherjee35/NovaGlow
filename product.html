@@ -12,6 +12,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         .product-page {
             padding-top: 100px;
@@ -168,14 +169,19 @@
             font-size: 1rem;
         }
 
-        .product-actions {
-            display: flex;
+        .product-details .product-actions {
+            display: flex !important;
             gap: var(--space-md);
             margin-bottom: var(--space-xl);
+            position: static !important;
+            opacity: 1 !important;
+            transform: none !important;
+            flex-direction: row !important;
         }
 
-        .product-actions .btn {
+        .product-details .product-actions .btn {
             flex: 1;
+            opacity: 1 !important;
         }
 
         .trust-badges {
@@ -294,7 +300,7 @@
                         <div class="meta-item">
                             <i class="fas fa-certificate"></i>
                             <strong>Authenticity:</strong>
-                            <span>100% Certified Genuine</span>
+                            <span id="product-authenticity">100% Certified Genuine</span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-truck"></i>
@@ -313,7 +319,13 @@
                         <button class="quantity-btn" id="qty-minus">-</button>
                         <input type="number" class="quantity-input" id="quantity" value="1" min="1">
                         <button class="quantity-btn" id="qty-plus">+</button>
+                        <span id="stock-info"
+                            style="margin-left: var(--space-md); color: var(--gray-500); font-size: 0.875rem;"></span>
                     </div>
+                    <p id="stock-warning"
+                        style="color: var(--warning); font-size: 0.875rem; margin-top: var(--space-sm); display: none;">
+                        <i class="fas fa-exclamation-triangle"></i> <span id="stock-warning-text"></span>
+                    </p>
 
                     <div class="product-actions">
                         <button class="btn btn-accent btn-lg" id="buy-now-btn">
@@ -328,8 +340,11 @@
                     </div>
 
                     <div class="trust-badges" id="trust-badges">
-                        <div class="trust-badge"><i class="fas fa-check-circle"></i> Genuine Products</div>
-                        <div class="trust-badge"><i class="fas fa-shield-alt"></i> Secure Packaging</div>
+                        <div class="trust-badge" id="badge-authenticity"><i class="fas fa-check-circle"></i>
+                            <span>Genuine Products</span>
+                        </div>
+                        <div class="trust-badge" id="badge-packaging"><i class="fas fa-shield-alt"></i> <span>Secure
+                                Packaging</span></div>
                         <div class="trust-badge" id="badge-returns" style="display:none;"><i class="fas fa-undo"></i>
                             Easy Returns</div>
                         <div class="trust-badge" id="badge-cod" style="display:none;"><i class="fas fa-money-bill"></i>
@@ -342,54 +357,120 @@
         </div>
     </div>
 
-    <!-- Buy Now / Inquiry Modal -->
+    <!-- Multi-Step Checkout Modal -->
     <div class="modal-overlay" id="inquiry-modal">
         <div class="modal" style="max-width: 550px;">
             <div class="modal-header">
-                <h3><i class="fas fa-shopping-bag gold-text"></i> Complete Your Order</h3>
+                <h3><i class="fas fa-shopping-bag gold-text"></i> <span id="modal-title">Order Summary</span></h3>
                 <button class="modal-close"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
+                <!-- Step Indicator -->
                 <div
-                    style="background: var(--gray-100); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-xl); display: flex; gap: var(--space-md); align-items: center;">
-                    <img id="modal-product-image" src="" alt=""
-                        style="width: 60px; height: 60px; border-radius: var(--radius-sm); object-fit: cover;">
-                    <div>
-                        <h4 id="modal-product-name" style="font-size: 1rem; margin-bottom: 4px;"></h4>
-                        <p id="modal-product-price" style="color: var(--primary); font-weight: 600;"></p>
+                    style="display: flex; justify-content: center; gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                    <div class="checkout-step active" id="step-indicator-1">
+                        <span
+                            style="width: 28px; height: 28px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 600;">1</span>
+                        <span style="font-size: 0.75rem; color: var(--primary); font-weight: 500;">Summary</span>
+                    </div>
+                    <div style="width: 40px; height: 2px; background: var(--gray-300); margin-top: 14px;"></div>
+                    <div class="checkout-step" id="step-indicator-2">
+                        <span
+                            style="width: 28px; height: 28px; background: var(--gray-300); color: var(--gray-500); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 600;"
+                            id="step-2-circle">2</span>
+                        <span style="font-size: 0.75rem; color: var(--gray-500);" id="step-2-text">Details</span>
                     </div>
                 </div>
 
-                <form id="inquiry-form">
-                    <div class="form-group">
-                        <label class="form-label">Full Name *</label>
-                        <input type="text" class="form-input" id="inq-name" placeholder="Enter your full name" required>
+                <!-- Step 1: Order Summary -->
+                <div id="checkout-step-1">
+                    <div
+                        style="background: var(--gray-100); padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-lg);">
+                        <div
+                            style="display: flex; gap: var(--space-md); align-items: center; margin-bottom: var(--space-md); padding-bottom: var(--space-md); border-bottom: 1px solid var(--gray-200);">
+                            <img id="modal-product-image" src="" alt=""
+                                style="width: 70px; height: 70px; border-radius: var(--radius-sm); object-fit: cover;">
+                            <div style="flex: 1;">
+                                <h4 id="modal-product-name" style="font-size: 1rem; margin-bottom: 4px;"></h4>
+                                <p style="color: var(--gray-500); font-size: 0.875rem;">Qty: <span
+                                        id="modal-qty">1</span></p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p id="modal-product-price"
+                                    style="color: var(--primary); font-weight: 600; font-size: 1.1rem;"></p>
+                            </div>
+                        </div>
+
+                        <!-- Price Breakdown -->
+                        <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                                <span>Subtotal</span>
+                                <span id="summary-subtotal">₹0</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                                <span>Shipping</span>
+                                <span id="summary-shipping" style="color: var(--success);">Free</span>
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; padding-top: var(--space-sm); border-top: 2px solid var(--gray-300); margin-top: var(--space-xs);">
+                                <span>Total</span>
+                                <span id="summary-total" style="color: var(--primary);">₹0</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Email Address *</label>
-                        <input type="email" class="form-input" id="inq-email" placeholder="Your email address" required>
+
+                    <div
+                        style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(74, 14, 78, 0.1)); padding: var(--space-md); border-radius: var(--radius-md); display: flex; align-items: center; gap: var(--space-md);">
+                        <i class="fas fa-shield-alt" style="color: var(--primary); font-size: 1.5rem;"></i>
+                        <div>
+                            <p style="font-weight: 600; font-size: 0.9rem;">Secure Payment via Razorpay</p>
+                            <p style="font-size: 0.75rem; color: var(--gray-500);">UPI, Cards, NetBanking accepted</p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Contact Number *</label>
-                        <input type="tel" class="form-input" id="inq-phone" placeholder="Your phone number" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Delivery Address *</label>
-                        <textarea class="form-input form-textarea" id="inq-address"
-                            placeholder="Enter complete delivery address with pincode" required></textarea>
-                    </div>
-                    <div class="form-group" id="saved-addresses-group" style="display: none;">
-                        <label class="form-label">Or select saved address:</label>
-                        <select class="form-input form-select" id="saved-addresses">
-                            <option value="">Choose an address...</option>
-                        </select>
-                    </div>
-                </form>
+                </div>
+
+                <!-- Step 2: Customer Details (Hidden Initially) -->
+                <div id="checkout-step-2" style="display: none;">
+                    <form id="inquiry-form">
+                        <div class="form-group">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" class="form-input" id="inq-name" placeholder="Enter your full name"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" class="form-input" id="inq-email" placeholder="Your email address"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contact Number *</label>
+                            <input type="tel" class="form-input" id="inq-phone" placeholder="Your phone number"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Delivery Address *</label>
+                            <textarea class="form-input form-textarea" id="inq-address"
+                                placeholder="Enter complete delivery address with pincode" required></textarea>
+                        </div>
+                        <div class="form-group" id="saved-addresses-group" style="display: none;">
+                            <label class="form-label">Or select saved address:</label>
+                            <select class="form-input form-select" id="saved-addresses">
+                                <option value="">Choose an address...</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-ghost modal-close">Cancel</button>
-                <button class="btn btn-accent" id="submit-inquiry">
-                    <i class="fas fa-paper-plane"></i> Submit Order Request
+                <button class="btn btn-ghost modal-close" id="checkout-back-btn" style="display: none;">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button class="btn btn-ghost modal-close" id="checkout-cancel-btn">Cancel</button>
+                <button class="btn btn-accent" id="checkout-next-btn">
+                    Proceed to Details <i class="fas fa-arrow-right"></i>
+                </button>
+                <button class="btn btn-accent" id="submit-inquiry" style="display: none;">
+                    <i class="fas fa-lock"></i> Pay <span id="pay-btn-amount">₹0</span>
                 </button>
             </div>
         </div>
@@ -397,15 +478,47 @@
 
     <!-- Success Modal -->
     <div class="modal-overlay" id="success-modal">
-        <div class="modal" style="max-width: 450px;">
-            <div class="modal-body">
-                <div class="success-content">
-                    <div class="success-icon"><i class="fas fa-check"></i></div>
-                    <h2>Order Request Submitted!</h2>
-                    <p>Thank you for your interest. Our team will contact you shortly to confirm your order and arrange
-                        delivery.</p>
-                    <button class="btn btn-primary" onclick="window.location.href='catalog.html'">Continue
-                        Shopping</button>
+        <div class="modal" style="max-width: 480px;">
+            <div class="modal-body" style="padding: var(--space-2xl);">
+                <div class="success-content" style="text-align: center;">
+                    <div class="success-icon"
+                        style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--success), #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-lg); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-check" style="font-size: 2.5rem; color: white;"></i>
+                    </div>
+                    <h2 style="color: var(--success); margin-bottom: var(--space-sm);">Payment Successful!</h2>
+                    <p id="success-order-number"
+                        style="font-size: 1.1rem; font-weight: 600; color: var(--primary); margin-bottom: var(--space-md);">
+                        #ORD-XXXXXX</p>
+
+                    <div
+                        style="background: var(--gray-100); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-lg); text-align: left;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-xs);">
+                            <span style="color: var(--gray-500);">Product</span>
+                            <span id="success-product-name" style="font-weight: 500;">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-xs);">
+                            <span style="color: var(--gray-500);">Amount Paid</span>
+                            <span id="success-amount" style="font-weight: 600; color: var(--primary);">₹0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--gray-500);">Status</span>
+                            <span style="color: var(--success); font-weight: 500;"><i class="fas fa-check-circle"></i>
+                                Confirmed</span>
+                        </div>
+                    </div>
+
+                    <p style="color: var(--gray-500); font-size: 0.9rem; margin-bottom: var(--space-lg);">
+                        We'll notify you when your order is shipped. You can track your order in My Orders.
+                    </p>
+
+                    <div style="display: flex; gap: var(--space-md); justify-content: center;">
+                        <button class="btn btn-outline" onclick="window.location.href='account/orders.html'">
+                            <i class="fas fa-box"></i> View My Orders
+                        </button>
+                        <button class="btn btn-primary" onclick="window.location.href='catalog.html'">
+                            Continue Shopping
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -522,6 +635,7 @@
 
                 // Display delivery options
                 document.getElementById('product-delivery-time').textContent = currentProduct.deliveryTime || '5-7 Business Days';
+                document.getElementById('product-authenticity').textContent = currentProduct.authenticity || '100% Certified Genuine';
 
                 // Shipping cost display
                 const shippingCost = currentProduct.shippingCost || 0;
@@ -544,10 +658,21 @@
                     document.getElementById('badge-returns').style.display = 'flex';
                 }
 
+                // Custom authenticity and packaging badges
+                if (currentProduct.authenticity) {
+                    document.querySelector('#badge-authenticity span').textContent = currentProduct.authenticity;
+                }
+                if (currentProduct.packaging) {
+                    document.querySelector('#badge-packaging span').textContent = currentProduct.packaging;
+                }
+
                 // Modal product info - use main image
                 document.getElementById('modal-product-image').src = mainImage;
                 document.getElementById('modal-product-name').textContent = currentProduct.name;
                 document.getElementById('modal-product-price').textContent = formatPrice(currentProduct.price);
+
+                // Update stock display
+                setTimeout(() => updateStockDisplay(), 100);
             } catch (error) {
                 console.error('Error loading product:', error);
                 showToast('Error loading product', 'error');
@@ -555,21 +680,118 @@
             }
         }
 
-        // Quantity controls
+        // Stock display and validation
+        function updateStockDisplay() {
+            const stock = currentProduct.stockQuantity ?? 1;
+            const stockInfo = document.getElementById('stock-info');
+            const stockWarning = document.getElementById('stock-warning');
+            const stockWarningText = document.getElementById('stock-warning-text');
+            const buyBtn = document.getElementById('buy-now-btn');
+            const addCartBtn = document.getElementById('add-cart-btn');
+            const qtyInput = document.getElementById('quantity');
+            const requestedQty = parseInt(qtyInput.value) || 1;
+
+            // Update stock info display
+            if (stock <= 0) {
+                stockInfo.innerHTML = '<span style="color: var(--error); font-weight: 600;">Out of Stock</span>';
+                buyBtn.disabled = true;
+                addCartBtn.disabled = true;
+                buyBtn.innerHTML = '<i class="fas fa-times-circle"></i> Out of Stock';
+                stockWarning.style.display = 'none';
+            } else if (stock <= 3) {
+                stockInfo.innerHTML = `<span style="color: var(--warning); font-weight: 500;">Only ${stock} left!</span>`;
+                qtyInput.max = stock;
+            } else {
+                stockInfo.innerHTML = `<span style="color: var(--success);">${stock} in stock</span>`;
+                qtyInput.max = stock;
+            }
+
+            // Validate requested quantity
+            if (stock > 0 && requestedQty > stock) {
+                stockWarning.style.display = 'block';
+                stockWarningText.textContent = `Only ${stock} item${stock > 1 ? 's' : ''} available in stock.`;
+                qtyInput.value = stock;
+            } else {
+                stockWarning.style.display = 'none';
+            }
+        }
+
+        // Quantity controls with stock validation
         document.getElementById('qty-minus').addEventListener('click', () => {
             const input = document.getElementById('quantity');
-            if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+                updateStockDisplay();
+            }
         });
 
         document.getElementById('qty-plus').addEventListener('click', () => {
             const input = document.getElementById('quantity');
-            input.value = parseInt(input.value) + 1;
+            const stock = currentProduct?.stockQuantity ?? 999;
+            const newVal = parseInt(input.value) + 1;
+
+            if (newVal <= stock) {
+                input.value = newVal;
+            } else {
+                document.getElementById('stock-warning').style.display = 'block';
+                document.getElementById('stock-warning-text').textContent = `Only ${stock} item${stock > 1 ? 's' : ''} available in stock.`;
+            }
+            updateStockDisplay();
         });
+
+        document.getElementById('quantity').addEventListener('change', () => {
+            updateStockDisplay();
+        });
+
+        // Helper to update order summary
+        function updateOrderSummary() {
+            const qty = parseInt(document.getElementById('quantity').value);
+            const price = currentProduct.price;
+            const shipping = (currentProduct.freeDelivery || currentProduct.shippingCost === 0) ? 0 : (currentProduct.shippingCost || 0);
+            const subtotal = price * qty;
+            const total = subtotal + shipping;
+
+            document.getElementById('modal-qty').textContent = qty;
+            document.getElementById('modal-product-price').textContent = formatPrice(price);
+            document.getElementById('summary-subtotal').textContent = formatPrice(subtotal);
+
+            if (shipping === 0) {
+                document.getElementById('summary-shipping').textContent = 'Free';
+                document.getElementById('summary-shipping').style.color = 'var(--success)';
+            } else {
+                document.getElementById('summary-shipping').textContent = formatPrice(shipping);
+                document.getElementById('summary-shipping').style.color = '';
+            }
+
+            document.getElementById('summary-total').textContent = formatPrice(total);
+            document.getElementById('pay-btn-amount').textContent = formatPrice(total);
+        }
+
+        // Reset checkout to Step 1
+        function resetCheckoutToStep1() {
+            document.getElementById('checkout-step-1').style.display = 'block';
+            document.getElementById('checkout-step-2').style.display = 'none';
+            document.getElementById('checkout-next-btn').style.display = 'inline-flex';
+            document.getElementById('submit-inquiry').style.display = 'none';
+            document.getElementById('checkout-back-btn').style.display = 'none';
+            document.getElementById('checkout-cancel-btn').style.display = 'inline-flex';
+            document.getElementById('modal-title').textContent = 'Order Summary';
+
+            // Reset step indicators
+            document.getElementById('step-2-circle').style.background = 'var(--gray-300)';
+            document.getElementById('step-2-circle').style.color = 'var(--gray-500)';
+            document.getElementById('step-2-text').style.color = 'var(--gray-500)';
+        }
 
         // Buy Now - Open Modal
         document.getElementById('buy-now-btn').addEventListener('click', () => {
             const modal = document.getElementById('inquiry-modal');
-            modal.classList.add('active');
+
+            // Reset to Step 1
+            resetCheckoutToStep1();
+
+            // Update summary
+            updateOrderSummary();
 
             // Prefill if logged in
             if (currentUser && userData) {
@@ -594,12 +816,39 @@
                     });
                 }
             }
+
+            modal.classList.add('active');
+        });
+
+        // Step Navigation: Next (Step 1 → Step 2)
+        document.getElementById('checkout-next-btn').addEventListener('click', () => {
+            document.getElementById('checkout-step-1').style.display = 'none';
+            document.getElementById('checkout-step-2').style.display = 'block';
+            document.getElementById('checkout-next-btn').style.display = 'none';
+            document.getElementById('submit-inquiry').style.display = 'inline-flex';
+            document.getElementById('checkout-back-btn').style.display = 'inline-flex';
+            document.getElementById('checkout-cancel-btn').style.display = 'none';
+            document.getElementById('modal-title').textContent = 'Delivery Details';
+
+            // Update step indicators
+            document.getElementById('step-2-circle').style.background = 'var(--primary)';
+            document.getElementById('step-2-circle').style.color = 'white';
+            document.getElementById('step-2-text').style.color = 'var(--primary)';
+            document.getElementById('step-2-text').style.fontWeight = '500';
+        });
+
+        // Step Navigation: Back (Step 2 → Step 1)
+        document.getElementById('checkout-back-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            resetCheckoutToStep1();
         });
 
         // Close modals
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+                resetCheckoutToStep1();
             });
         });
 
@@ -617,36 +866,99 @@
 
             const btn = document.getElementById('submit-inquiry');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
             try {
-                // Save order to Firestore
-                await addDoc(collection(db, 'orders'), {
-                    userId: currentUser?.uid || null,
-                    productId: currentProduct.id,
-                    productName: currentProduct.name,
-                    productPrice: currentProduct.price,
-                    productImage: currentProduct.image,
-                    quantity: parseInt(document.getElementById('quantity').value),
-                    customerName: name,
-                    customerEmail: email,
-                    customerPhone: phone,
-                    deliveryAddress: address,
-                    status: 'pending',
-                    createdAt: serverTimestamp()
-                });
+                const quantity = parseInt(document.getElementById('quantity').value);
+                const price = currentProduct.price;
+                const shipping = (currentProduct.freeDelivery || currentProduct.shippingCost === 0) ? 0 : (currentProduct.shippingCost || 0);
+                const totalAmount = (price * quantity) + shipping;
 
-                // Mark product as sold
-                await updateDoc(doc(db, 'products', currentProduct.id), {
-                    stockStatus: 'sold'
-                });
+                const options = {
+                    "key": "rzp_test_RzLjFWALUHeYWR",
+                    "amount": totalAmount * 100, // Amount in paise
+                    "currency": "INR",
+                    "name": "NovaGlow Jewelry",
+                    "description": `Purchase of ${currentProduct.name}`,
+                    "image": "https://your-logo-url.com/logo.png", // Replace with actual logo URL if available
+                    "handler": async function (response) {
+                        try {
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming Order...';
 
-                document.getElementById('inquiry-modal').classList.remove('active');
-                document.getElementById('success-modal').classList.add('active');
+                            // Generate unique Order Number
+                            const orderNumber = '#ORD-' + Math.floor(100000 + Math.random() * 900000);
+
+                            // Save order to Firestore
+                            await addDoc(collection(db, 'orders'), {
+                                orderNumber: orderNumber,
+                                userId: currentUser?.uid || null,
+                                productId: currentProduct.id,
+                                productName: currentProduct.name,
+                                productPrice: currentProduct.price,
+                                productImage: currentProduct.images ? (currentProduct.images[currentProduct.mainImageIndex || 0] || currentProduct.images[0]) : currentProduct.image,
+                                quantity: quantity,
+                                shippingCost: shipping,
+                                totalAmount: totalAmount,
+                                customerName: name,
+                                customerEmail: email,
+                                customerPhone: phone,
+                                deliveryAddress: address,
+                                status: 'paid', // Initial status after payment
+                                paymentStatus: 'paid',
+                                paymentId: response.razorpay_payment_id,
+                                paymentMethod: 'online',
+                                createdAt: serverTimestamp()
+                            });
+
+                            // Update stock - decrement by purchased quantity
+                            const newStockQty = Math.max(0, (currentProduct.stockQuantity || 1) - quantity);
+                            await updateDoc(doc(db, 'products', currentProduct.id), {
+                                stockQuantity: newStockQty,
+                                stockStatus: newStockQty <= 0 ? 'sold' : 'available'
+                            });
+
+                            // Populate success modal
+                            document.getElementById('success-order-number').textContent = orderNumber;
+                            document.getElementById('success-product-name').textContent = currentProduct.name;
+                            document.getElementById('success-amount').textContent = formatPrice(totalAmount);
+
+                            document.getElementById('inquiry-modal').classList.remove('active');
+                            document.getElementById('success-modal').classList.add('active');
+                            showToast('Payment Successful! Order Placed.', 'success');
+
+                        } catch (err) {
+                            console.error('Error saving order:', err);
+                            showToast('Payment successful but error saving order. Contact support.', 'error');
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-lock"></i> Pay <span id="pay-btn-amount">' + formatPrice(totalAmount) + '</span>';
+                        }
+                    },
+                    "prefill": {
+                        "name": name,
+                        "email": email,
+                        "contact": phone
+                    },
+                    "theme": {
+                        "color": "#D4AF37"
+                    },
+                    "modal": {
+                        "ondismiss": function () {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Order Request';
+                            showToast('Payment Cancelled', 'info');
+                        }
+                    }
+                };
+
+                const rzp1 = new Razorpay(options);
+                rzp1.open();
 
             } catch (error) {
-                console.error('Error submitting order:', error);
-                showToast('Error submitting order. Please try again.', 'error');
+                console.error('Error initiating payment:', error);
+                showToast('Error initiating payment. Please try again.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Order Request';
             }
 
             btn.disabled = false;

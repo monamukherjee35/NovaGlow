@@ -227,10 +227,14 @@
                         <label class="form-label">Product Name *</label>
                         <input type="text" class="form-input" id="prod-name" required>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-md);">
                         <div class="form-group">
                             <label class="form-label">Price (₹) *</label>
                             <input type="number" class="form-input" id="prod-price" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stock Quantity *</label>
+                            <input type="number" class="form-input" id="prod-stock-qty" min="0" value="1" required>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Category *</label>
@@ -245,12 +249,25 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Description</label>
-                        <textarea class="form-input form-textarea" id="prod-description"></textarea>
+                        <textarea class="form-input form-textarea" id="prod-description"
+                            placeholder="Describe the product for customers..."></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Materials</label>
                         <input type="text" class="form-input" id="prod-materials"
-                            placeholder="e.g. Gold, Diamond, Pearl">
+                            placeholder="e.g. Gold polished, Diamond, Pearl">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                        <div class="form-group">
+                            <label class="form-label">Authenticity Claim</label>
+                            <input type="text" class="form-input" id="prod-authenticity"
+                                placeholder="e.g. 100% Certified Genuine" value="100% Certified Genuine">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Secure Packaging Text</label>
+                            <input type="text" class="form-input" id="prod-packaging"
+                                placeholder="e.g. Secure Packaging" value="Secure Packaging">
+                        </div>
                     </div>
 
                     <!-- Image Upload Section -->
@@ -587,8 +604,11 @@
             document.getElementById('prod-category').value = product.category || '';
             document.getElementById('prod-description').value = product.description || '';
             document.getElementById('prod-materials').value = product.materials || '';
+            document.getElementById('prod-authenticity').value = product.authenticity || '100% Certified Genuine';
+            document.getElementById('prod-packaging').value = product.packaging || 'Secure Packaging';
             document.getElementById('prod-badge').value = product.badge || '';
             document.getElementById('prod-stock').value = product.stockStatus || 'available';
+            document.getElementById('prod-stock-qty').value = product.stockQuantity ?? 1;
             document.getElementById('prod-active').checked = product.active !== false;
 
             // Delivery options
@@ -663,6 +683,7 @@
             const materials = document.getElementById('prod-materials').value.trim();
             const badge = document.getElementById('prod-badge').value.trim();
             const stockStatus = document.getElementById('prod-stock').value;
+            const stockQuantity = parseInt(document.getElementById('prod-stock-qty').value) || 0;
             const active = document.getElementById('prod-active').checked;
 
             // Delivery options
@@ -689,8 +710,16 @@
             const images = uploadedImages.map(img => img.url);
             const imagePaths = uploadedImages.map(img => img.path).filter(Boolean);
 
+            // Additional product info
+            const authenticity = document.getElementById('prod-authenticity').value.trim() || '100% Certified Genuine';
+            const packaging = document.getElementById('prod-packaging').value.trim() || 'Secure Packaging';
+
             const productData = {
-                name, price, category, description, materials, badge, stockStatus, active,
+                name, price, category, description, materials, badge,
+                stockStatus: stockQuantity > 0 ? 'available' : 'sold',
+                stockQuantity,
+                active,
+                authenticity, packaging,
                 images,
                 imagePaths,
                 mainImageIndex,
