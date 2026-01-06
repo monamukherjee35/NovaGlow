@@ -12,7 +12,8 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script id="bolt" src="https://sboxcheckout-static.citruspay.com/bolt/run/bolt.min.js" bolt-color="D4AF37"
+        bolt-logo=""></script>
     <style>
         .product-page {
             padding-top: 100px;
@@ -1085,95 +1086,141 @@
                 const shipping = (currentProduct.freeDelivery || currentProduct.shippingCost === 0) ? 0 : (currentProduct.shippingCost || 0);
                 const totalAmount = (price * quantity) + shipping;
 
-                const options = {
-                    "key": "rzp_test_RzLjFWALUHeYWR",
-                    "amount": totalAmount * 100, // Amount in paise
-                    "currency": "INR",
-                    "name": "NovaGlow Jewelry",
-                    "description": `Purchase of ${currentProduct.name}`,
-                    "image": "https://your-logo-url.com/logo.png", // Replace with actual logo URL if available
-                    "handler": async function (response) {
+                // PayU Test Credentials
+                const PAYU_KEY = 'U4FAmi';
+                const PAYU_SALT = '7ac1BK3Kv6Vll3ztWWSPsoGO07Y0Yi3p';
+
+                // Generate unique transaction ID
+                const txnid = 'TXN' + Date.now() + Math.floor(Math.random() * 1000);
+
+                // PayU hash generation (SHA-512)
+                // Hash format: key|txnid|amount|productinfo|firstname|email|||||||||||salt
+                async function generatePayUHash(key, txnid, amount, productinfo, firstname, email, salt) {
+                    const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(hashString);
+                    const hashBuffer = await crypto.subtle.digest('SHA-512', data);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                    return hashHex;
+                }
+
+                const hash = await generatePayUHash(
+                    PAYU_KEY,
+                    txnid,
+                    totalAmount.toFixed(2),
+                    currentProduct.name,
+                    name.split(' ')[0],
+                    email,
+                    PAYU_SALT
+                );
+
+                const payuData = {
+                    key: PAYU_KEY,
+                    txnid: txnid,
+                    amount: totalAmount.toFixed(2),
+                    productinfo: currentProduct.name,
+                    firstname: name.split(' ')[0],
+                    lastname: name.split(' ').slice(1).join(' ') || '',
+                    email: email,
+                    phone: phone,
+                    surl: window.location.origin + '/success.html',
+                    furl: window.location.origin + '/failure.html',
+                    hash: hash
+                };
+
+                // Store order data for after payment success
+                const orderData = {
+                    productId: currentProduct.id,
+                    productName: currentProduct.name,
+                    productPrice: currentProduct.price,
+                    productImage: currentProduct.images ? (currentProduct.images[currentProduct.mainImageIndex || 0] || currentProduct.images[0]) : currentProduct.image,
+                    quantity: quantity,
+                    shippingCost: shipping,
+                    totalAmount: totalAmount,
+                    customerName: name,
+                    customerEmail: email,
+                    customerPhone: phone,
+                    deliveryAddress: address
+                };
+                sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
+
+                bolt.launch(payuData, {
+                    responseHandler: async function (response) {
                         try {
-                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming Order...';
+                            console.log('PayU Response:', response);
 
-                            // Generate unique Order Number
-                            const orderNumber = '#ORD-' + Math.floor(100000 + Math.random() * 900000);
+                            if (response.response.txnStatus === 'SUCCESS') {
+                                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming Order...';
 
-                            // Save order to Firestore
-                            await addDoc(collection(db, 'orders'), {
-                                orderNumber: orderNumber,
-                                userId: currentUser?.uid || null,
-                                productId: currentProduct.id,
-                                productName: currentProduct.name,
-                                productPrice: currentProduct.price,
-                                productImage: currentProduct.images ? (currentProduct.images[currentProduct.mainImageIndex || 0] || currentProduct.images[0]) : currentProduct.image,
-                                quantity: quantity,
-                                shippingCost: shipping,
-                                totalAmount: totalAmount,
-                                customerName: name,
-                                customerEmail: email,
-                                customerPhone: phone,
-                                deliveryAddress: address,
-                                status: 'paid', // Initial status after payment
-                                paymentStatus: 'paid',
-                                paymentId: response.razorpay_payment_id,
-                                paymentMethod: 'online',
-                                createdAt: serverTimestamp()
-                            });
+                                // Generate unique Order Number
+                                const orderNumber = '#ORD-' + Math.floor(100000 + Math.random() * 900000);
 
-                            // Update stock - decrement by purchased quantity
-                            const newStockQty = Math.max(0, (currentProduct.stockQuantity || 1) - quantity);
-                            await updateDoc(doc(db, 'products', currentProduct.id), {
-                                stockQuantity: newStockQty,
-                                stockStatus: newStockQty <= 0 ? 'sold' : 'available'
-                            });
+                                // Save order to Firestore
+                                await addDoc(collection(db, 'orders'), {
+                                    orderNumber: orderNumber,
+                                    userId: currentUser?.uid || null,
+                                    productId: currentProduct.id,
+                                    productName: currentProduct.name,
+                                    productPrice: currentProduct.price,
+                                    productImage: currentProduct.images ? (currentProduct.images[currentProduct.mainImageIndex || 0] || currentProduct.images[0]) : currentProduct.image,
+                                    quantity: quantity,
+                                    shippingCost: shipping,
+                                    totalAmount: totalAmount,
+                                    customerName: name,
+                                    customerEmail: email,
+                                    customerPhone: phone,
+                                    deliveryAddress: address,
+                                    status: 'paid',
+                                    paymentStatus: 'paid',
+                                    paymentId: response.response.payuMoneyId || txnid,
+                                    paymentMethod: 'payu',
+                                    txnid: txnid,
+                                    createdAt: serverTimestamp()
+                                });
 
-                            // Populate success modal
-                            document.getElementById('success-order-number').textContent = orderNumber;
-                            document.getElementById('success-product-name').textContent = currentProduct.name;
-                            document.getElementById('success-amount').textContent = formatPrice(totalAmount);
+                                // Update stock
+                                const newStockQty = Math.max(0, (currentProduct.stockQuantity || 1) - quantity);
+                                await updateDoc(doc(db, 'products', currentProduct.id), {
+                                    stockQuantity: newStockQty,
+                                    stockStatus: newStockQty <= 0 ? 'sold' : 'available'
+                                });
 
-                            document.getElementById('inquiry-modal').classList.remove('active');
-                            document.getElementById('success-modal').classList.add('active');
-                            showToast('Payment Successful! Order Placed.', 'success');
+                                // Populate success modal
+                                document.getElementById('success-order-number').textContent = orderNumber;
+                                document.getElementById('success-product-name').textContent = currentProduct.name;
+                                document.getElementById('success-amount').textContent = formatPrice(totalAmount);
 
+                                document.getElementById('inquiry-modal').classList.remove('active');
+                                document.getElementById('success-modal').classList.add('active');
+                                showToast('Payment Successful! Order Placed.', 'success');
+
+                                sessionStorage.removeItem('pendingOrder');
+                            } else {
+                                showToast('Payment failed: ' + (response.response.txnMessage || 'Unknown error'), 'error');
+                            }
                         } catch (err) {
-                            console.error('Error saving order:', err);
-                            showToast('Payment successful but error saving order. Contact support.', 'error');
+                            console.error('Error processing payment:', err);
+                            showToast('Payment error. Please contact support.', 'error');
                         } finally {
                             btn.disabled = false;
                             btn.innerHTML = '<i class="fas fa-lock"></i> Pay <span id="pay-btn-amount">' + formatPrice(totalAmount) + '</span>';
                         }
                     },
-                    "prefill": {
-                        "name": name,
-                        "email": email,
-                        "contact": phone
-                    },
-                    "theme": {
-                        "color": "#D4AF37"
-                    },
-                    "modal": {
-                        "ondismiss": function () {
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Order Request';
-                            showToast('Payment Cancelled', 'info');
-                        }
+                    catchException: function (response) {
+                        console.error('PayU Exception:', response);
+                        showToast('Payment cancelled or failed.', 'info');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-lock"></i> Pay <span id="pay-btn-amount">' + formatPrice(totalAmount) + '</span>';
                     }
-                };
-
-                const rzp1 = new Razorpay(options);
-                rzp1.open();
+                });
 
             } catch (error) {
                 console.error('Error initiating payment:', error);
                 showToast('Error initiating payment. Please try again.', 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Order Request';
+                btn.innerHTML = '<i class="fas fa-lock"></i> Pay <span id="pay-btn-amount">₹0</span>';
             }
-
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Order Request';
         });
 
         // Add to Cart
