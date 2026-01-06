@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - NovaGlow Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--space-xl);
+        }
+
+        .settings-section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .settings-section h3 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--gray-200);
+            color: var(--primary);
+        }
+
+        .settings-section h3 i {
+            color: var(--accent);
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: var(--space-xs);
+        }
+
+        .setting-info p {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gray-300);
+            border-radius: 26px;
+            transition: var(--transition-base);
+        }
+
+        .toggle-slider:before {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: var(--transition-base);
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background: var(--primary);
+        }
+
+        .toggle-switch input:checked+.toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .store-info-item {
+            margin-bottom: var(--space-lg);
+        }
+
+        .store-info-item label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: var(--space-sm);
+            color: var(--gray-600);
+        }
+
+        .store-info-item input,
+        .store-info-item textarea {
+            width: 100%;
+            padding: var(--space-md);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            transition: var(--transition-base);
+        }
+
+        .store-info-item input:focus,
+        .store-info-item textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .danger-zone {
+            border: 2px solid var(--error);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .danger-zone h3 {
+            color: var(--error);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition-base);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h1>Nova<span>Glow</span></h1>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-section-title">Main</span>
+                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="products.html"><i class="fas fa-gem"></i> Products</a>
+                    <a href="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a>
+                </div>
+                <div class="nav-section">
+                    <span class="nav-section-title">Management</span>
+                    <a href="users.html"><i class="fas fa-users"></i> Customers</a>
+                    <a href="categories.html"><i class="fas fa-tags"></i> Categories</a>
+                </div>
+                <div class="nav-section">
+                    <span class="nav-section-title">Store</span>
+                    <a href="settings.html" class="active"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="../index.html"><i class="fas fa-store"></i> View Store</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Settings</h1>
+            </div>
+
+            <div class="settings-grid">
+                <!-- Store Information -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-store"></i> Store Information</h3>
+                    <div class="store-info-item">
+                        <label>Store Name</label>
+                        <input type="text" id="store-name" value="NovaGlow" placeholder="Your store name">
+                    </div>
+                    <div class="store-info-item">
+                        <label>Contact Email</label>
+                        <input type="email" id="store-email" placeholder="store@email.com">
+                    </div>
+                    <div class="store-info-item">
+                        <label>Contact Phone</label>
+                        <input type="tel" id="store-phone" placeholder="+91 XXXXX XXXXX">
+                    </div>
+                    <div class="store-info-item">
+                        <label>Store Address</label>
+                        <textarea id="store-address" rows="3" placeholder="Enter your store address"></textarea>
+                    </div>
+                    <button class="btn btn-primary" id="save-store-info"
+                        style="width: 100%; margin-top: var(--space-md);">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+
+                <!-- Notifications -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-bell"></i> Notification Preferences</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>New Order Alerts</h4>
+                            <p>Get notified when a new order is placed</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notify-orders" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>Low Stock Alerts</h4>
+                            <p>Alert when product stock is below 5</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notify-low-stock" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>Customer Inquiries</h4>
+                            <p>Get notified for new customer messages</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notify-inquiries" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Payment Settings -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-credit-card"></i> Payment Settings</h3>
+                    <div class="store-info-item">
+                        <label>Razorpay Key ID</label>
+                        <input type="text" id="razorpay-key" value="rzp_test_RzLjFWALUHeYWR" readonly
+                            style="background: var(--gray-100);">
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--gray-500); margin-top: var(--space-sm);">
+                        <i class="fas fa-info-circle"></i> To change payment configuration, update the
+                        firebase-config.js file.
+                    </p>
+                </div>
+
+                <!-- Account Actions -->
+                <div class="settings-section danger-zone">
+                    <h3><i class="fas fa-shield-alt"></i> Account</h3>
+                    <div class="setting-item" style="border-bottom: none;">
+                        <div class="setting-info">
+                            <h4>Sign Out</h4>
+                            <p>Log out of the admin dashboard</p>
+                        </div>
+                        <button class="btn-danger" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db, ADMIN_EMAIL } from '../js/firebase-config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function loadSettings() {
+            try {
+                const settingsDoc = await getDoc(doc(db, 'settings', 'store'));
+                if (settingsDoc.exists()) {
+                    const data = settingsDoc.data();
+                    document.getElementById('store-name').value = data.storeName || 'NovaGlow';
+                    document.getElementById('store-email').value = data.contactEmail || '';
+                    document.getElementById('store-phone').value = data.contactPhone || '';
+                    document.getElementById('store-address').value = data.storeAddress || '';
+                    document.getElementById('notify-orders').checked = data.notifyOrders !== false;
+                    document.getElementById('notify-low-stock').checked = data.notifyLowStock !== false;
+                    document.getElementById('notify-inquiries').checked = data.notifyInquiries !== false;
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        document.getElementById('save-store-info').addEventListener('click', async () => {
+            const btn = document.getElementById('save-store-info');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                await setDoc(doc(db, 'settings', 'store'), {
+                    storeName: document.getElementById('store-name').value.trim(),
+                    contactEmail: document.getElementById('store-email').value.trim(),
+                    contactPhone: document.getElementById('store-phone').value.trim(),
+                    storeAddress: document.getElementById('store-address').value.trim(),
+                    notifyOrders: document.getElementById('notify-orders').checked,
+                    notifyLowStock: document.getElementById('notify-low-stock').checked,
+                    notifyInquiries: document.getElementById('notify-inquiries').checked,
+                    updatedAt: new Date()
+                }, { merge: true });
+
+                showToast('Settings saved successfully!', 'success');
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showToast('Error saving settings', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            if (!confirm('Are you sure you want to logout?')) return;
+
+            try {
+                await signOut(auth);
+                window.location.href = '../auth/login.html';
+            } catch (error) {
+                showToast('Error logging out', 'error');
+            }
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email !== ADMIN_EMAIL) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+            loadSettings();
+        });
+    </script>
+</body>
+
+</html>

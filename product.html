@@ -247,6 +247,116 @@
             color: var(--gray-500);
             margin-bottom: var(--space-xl);
         }
+
+        /* Login Required Modal */
+        .login-modal-content {
+            text-align: center;
+            padding: var(--space-xl);
+        }
+
+        .login-modal-content .login-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--space-lg);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .login-modal-content h2 {
+            color: var(--primary);
+            margin-bottom: var(--space-sm);
+            font-size: 1.5rem;
+        }
+
+        .login-modal-content>p {
+            color: var(--gray-500);
+            margin-bottom: var(--space-xl);
+        }
+
+        .login-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .login-option-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-base);
+            border: 2px solid var(--gray-200);
+            background: white;
+            font-size: 1rem;
+        }
+
+        .login-option-btn.google {
+            background: white;
+            color: var(--dark);
+        }
+
+        .login-option-btn.google:hover {
+            background: var(--gray-100);
+            border-color: var(--gray-300);
+        }
+
+        .login-option-btn.phone {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .login-option-btn.phone:hover {
+            background: var(--primary-dark);
+        }
+
+        .login-option-btn img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .login-benefits {
+            background: var(--gray-100);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            text-align: left;
+        }
+
+        .login-benefits h4 {
+            font-size: 0.875rem;
+            margin-bottom: var(--space-sm);
+            color: var(--primary);
+        }
+
+        .login-benefits ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--gray-600);
+        }
+
+        .login-benefits li {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xs);
+        }
+
+        .login-benefits li i {
+            color: var(--success);
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 
@@ -524,6 +634,46 @@
         </div>
     </div>
 
+    <!-- Login Required Modal -->
+    <div class="modal-overlay" id="login-required-modal">
+        <div class="modal" style="max-width: 420px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock gold-text"></i> Login Required</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="login-modal-content">
+                    <div class="login-icon">
+                        <i class="fas fa-user-lock"></i>
+                    </div>
+                    <h2>Please Login to Continue</h2>
+                    <p>Sign in to complete your purchase and enjoy exclusive benefits!</p>
+
+                    <div class="login-options">
+                        <button class="login-option-btn google" id="google-login-btn">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                            Continue with Google
+                        </button>
+                        <button class="login-option-btn phone" id="phone-login-btn">
+                            <i class="fas fa-mobile-alt"></i>
+                            Login with Phone Number
+                        </button>
+                    </div>
+
+                    <div class="login-benefits">
+                        <h4><i class="fas fa-sparkles"></i> Benefits of signing in:</h4>
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Track your orders in real-time</li>
+                            <li><i class="fas fa-check-circle"></i> Save addresses for faster checkout</li>
+                            <li><i class="fas fa-check-circle"></i> Create wishlists and save favorites</li>
+                            <li><i class="fas fa-check-circle"></i> Get exclusive offers & updates</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="footer">
         <div class="container">
             <div class="footer-bottom" style="border-top: none; padding-top: 0;">
@@ -535,13 +685,15 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script type="module">
-        import { auth, db } from './js/firebase-config.js';
+        import { auth, db, googleProvider } from './js/firebase-config.js';
         import { doc, getDoc, updateDoc, arrayUnion, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { onAuthStateChanged, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         let currentProduct = null;
         let currentUser = null;
         let userData = null;
+        let pendingBuyAction = false; // Track if user was trying to buy before login
 
         function formatPrice(price) {
             return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(price);
@@ -783,8 +935,21 @@
             document.getElementById('step-2-text').style.color = 'var(--gray-500)';
         }
 
-        // Buy Now - Open Modal
+        // Buy Now - Open Modal (Login Required)
         document.getElementById('buy-now-btn').addEventListener('click', () => {
+            // Check if user is logged in
+            if (!currentUser) {
+                // Show login required modal
+                pendingBuyAction = true;
+                document.getElementById('login-required-modal').classList.add('active');
+                return;
+            }
+
+            openCheckoutModal();
+        });
+
+        // Open checkout modal function
+        function openCheckoutModal() {
             const modal = document.getElementById('inquiry-modal');
 
             // Reset to Step 1
@@ -818,6 +983,52 @@
             }
 
             modal.classList.add('active');
+        }
+
+        // Login modal handlers
+        document.getElementById('google-login-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('google-login-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+
+                // Check if user document exists, create if not
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (!userDoc.exists()) {
+                    await setDoc(doc(db, 'users', user.uid), {
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName || 'User',
+                        role: 'customer',
+                        phone: user.phoneNumber || '',
+                        addresses: [],
+                        cart: [],
+                        wishlist: [],
+                        liked: [],
+                        createdAt: serverTimestamp()
+                    });
+                }
+
+                showToast('Login successful!', 'success');
+                document.getElementById('login-required-modal').classList.remove('active');
+
+                // User data will be loaded by onAuthStateChanged
+            } catch (error) {
+                console.error('Google sign-in error:', error);
+                showToast('Sign-in failed. Please try again.', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
+        });
+
+        document.getElementById('phone-login-btn').addEventListener('click', () => {
+            // Store the current URL to return after login
+            sessionStorage.setItem('returnUrl', window.location.href + '#buy');
+            window.location.href = 'auth/login.html';
         });
 
         // Step Navigation: Next (Step 1 → Step 2)
@@ -1014,6 +1225,13 @@
                 }
                 document.getElementById('auth-buttons').style.display = 'none';
                 document.getElementById('user-menu').style.display = 'flex';
+
+                // If user was trying to buy before login, open checkout
+                if (pendingBuyAction) {
+                    pendingBuyAction = false;
+                    document.getElementById('login-required-modal').classList.remove('active');
+                    setTimeout(() => openCheckoutModal(), 300);
+                }
             }
         });
 

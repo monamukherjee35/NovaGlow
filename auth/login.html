@@ -151,7 +151,12 @@
         // Check if already logged in
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                if (user.email === ADMIN_EMAIL) {
+                // Check for return URL from product page
+                const returnUrl = sessionStorage.getItem('returnUrl');
+                if (returnUrl) {
+                    sessionStorage.removeItem('returnUrl');
+                    window.location.href = returnUrl;
+                } else if (user.email === ADMIN_EMAIL) {
                     window.location.href = '../admin/dashboard.html';
                 } else {
                     window.location.href = '../account/dashboard.html';
@@ -179,7 +184,12 @@
             if (result.success) {
                 showToast('Login successful!', 'success');
                 setTimeout(() => {
-                    if (result.user.email === ADMIN_EMAIL) {
+                    // Check for return URL from product page
+                    const returnUrl = sessionStorage.getItem('returnUrl');
+                    if (returnUrl) {
+                        sessionStorage.removeItem('returnUrl');
+                        window.location.href = returnUrl;
+                    } else if (result.user.email === ADMIN_EMAIL) {
                         window.location.href = '../admin/dashboard.html';
                     } else {
                         window.location.href = '../account/dashboard.html';
