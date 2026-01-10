@@ -12,8 +12,8 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <script id="bolt" src="https://sboxcheckout-static.citruspay.com/bolt/run/bolt.min.js" bolt-color="D4AF37"
-        bolt-logo=""></script>
+    <!-- Razorpay Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         .product-page {
             padding-top: 100px;
@@ -358,6 +358,374 @@
             color: var(--success);
             font-size: 0.75rem;
         }
+
+        /* Enhanced Checkout Modal Styles */
+        .checkout-progress {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-xl);
+            position: relative;
+        }
+
+        .checkout-progress::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 25%;
+            right: 25%;
+            height: 3px;
+            background: var(--gray-200);
+            z-index: 0;
+        }
+
+        .checkout-progress .progress-fill {
+            position: absolute;
+            top: 20px;
+            left: 25%;
+            width: 0%;
+            max-width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            z-index: 1;
+            transition: width 0.4s ease;
+        }
+
+        .checkout-progress.step-2 .progress-fill {
+            width: 50%;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-xs);
+            z-index: 2;
+            flex: 1;
+        }
+
+        .progress-step .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background: var(--gray-200);
+            color: var(--gray-500);
+            transition: all 0.3s ease;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-step.active .step-circle,
+        .progress-step.completed .step-circle {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+
+        .progress-step.completed .step-circle {
+            background: var(--success);
+        }
+
+        .progress-step .step-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-step.active .step-label {
+            color: var(--primary);
+        }
+
+        .order-card {
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            border: 1px solid var(--gray-200);
+        }
+
+        .order-card-header {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+            padding-bottom: var(--space-md);
+            border-bottom: 1px dashed var(--gray-300);
+            margin-bottom: var(--space-md);
+        }
+
+        .order-card-header img {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-card-header .product-info {
+            flex: 1;
+        }
+
+        .order-card-header .product-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            color: var(--dark);
+        }
+
+        .order-card-header .product-info .qty-badge {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 2px 10px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .order-card-header .product-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .price-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .price-row.total {
+            padding-top: var(--space-sm);
+            border-top: 2px solid var(--gray-300);
+            margin-top: var(--space-xs);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .price-row.total span:last-child {
+            color: var(--primary);
+        }
+
+        .security-banner {
+            background: linear-gradient(135deg, rgba(74, 14, 78, 0.08), rgba(212, 175, 55, 0.08));
+            border: 1px solid rgba(74, 14, 78, 0.15);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .security-banner .security-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .security-banner .security-text h5 {
+            font-size: 0.95rem;
+            color: var(--dark);
+            margin-bottom: 2px;
+        }
+
+        .security-banner .security-text p {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+            margin: 0;
+        }
+
+        .trust-strip {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            padding: var(--space-md);
+            background: var(--gray-100);
+            border-radius: var(--radius-md);
+            margin-top: var(--space-md);
+        }
+
+        .trust-strip .trust-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+
+        .trust-strip .trust-item i {
+            color: var(--success);
+        }
+
+        .delivery-estimate {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .delivery-estimate i {
+            font-size: 1.5rem;
+            color: var(--success);
+        }
+
+        .delivery-estimate .delivery-text {
+            flex: 1;
+        }
+
+        .delivery-estimate .delivery-text strong {
+            display: block;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .delivery-estimate .delivery-text span {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+        }
+
+        /* Enhanced Form Styles */
+        .checkout-form .form-group {
+            margin-bottom: var(--space-md);
+        }
+
+        .checkout-form .form-label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-weight: 500;
+            margin-bottom: var(--space-xs);
+            color: var(--dark);
+        }
+
+        .checkout-form .form-label i {
+            color: var(--primary);
+            font-size: 0.85rem;
+        }
+
+        .checkout-form .form-input {
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .checkout-form .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(74, 14, 78, 0.1);
+        }
+
+        .checkout-form .form-input.valid {
+            border-color: var(--success);
+        }
+
+        .checkout-form .form-input.invalid {
+            border-color: var(--error);
+        }
+
+        .input-helper {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        .saved-address-card {
+            background: var(--gray-100);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .saved-address-card:hover {
+            border-color: var(--primary);
+            background: rgba(74, 14, 78, 0.05);
+        }
+
+        .saved-address-card.selected {
+            border-color: var(--primary);
+            background: rgba(74, 14, 78, 0.08);
+        }
+
+        .razorpay-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm);
+            background: #f8f9fa;
+            border-radius: var(--radius-sm);
+            margin-top: var(--space-md);
+        }
+
+        .razorpay-badge img {
+            height: 20px;
+        }
+
+        .razorpay-badge span {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .pay-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #6b1f70 100%);
+            border: none;
+            color: white;
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 14, 78, 0.3);
+        }
+
+        .pay-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 14, 78, 0.4);
+        }
+
+        .pay-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pay-btn .lock-icon {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+        }
     </style>
 </head>
 
@@ -468,124 +836,150 @@
         </div>
     </div>
 
-    <!-- Multi-Step Checkout Modal -->
+    <!-- Enhanced Multi-Step Checkout Modal -->
     <div class="modal-overlay" id="inquiry-modal">
-        <div class="modal" style="max-width: 550px;">
+        <div class="modal" style="max-width: 580px;">
             <div class="modal-header">
-                <h3><i class="fas fa-shopping-bag gold-text"></i> <span id="modal-title">Order Summary</span></h3>
+                <h3><i class="fas fa-shopping-bag gold-text"></i> <span id="modal-title">Secure Checkout</span></h3>
                 <button class="modal-close"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
-                <!-- Step Indicator -->
-                <div
-                    style="display: flex; justify-content: center; gap: var(--space-lg); margin-bottom: var(--space-xl);">
-                    <div class="checkout-step active" id="step-indicator-1">
-                        <span
-                            style="width: 28px; height: 28px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 600;">1</span>
-                        <span style="font-size: 0.75rem; color: var(--primary); font-weight: 500;">Summary</span>
+                <!-- Enhanced Step Indicator -->
+                <div class="checkout-progress" id="checkout-progress">
+                    <div class="progress-fill"></div>
+                    <div class="progress-step active" id="progress-step-1">
+                        <span class="step-circle">1</span>
+                        <span class="step-label">Review</span>
                     </div>
-                    <div style="width: 40px; height: 2px; background: var(--gray-300); margin-top: 14px;"></div>
-                    <div class="checkout-step" id="step-indicator-2">
-                        <span
-                            style="width: 28px; height: 28px; background: var(--gray-300); color: var(--gray-500); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 600;"
-                            id="step-2-circle">2</span>
-                        <span style="font-size: 0.75rem; color: var(--gray-500);" id="step-2-text">Details</span>
+                    <div class="progress-step" id="progress-step-2">
+                        <span class="step-circle">2</span>
+                        <span class="step-label">Details</span>
                     </div>
                 </div>
 
-                <!-- Step 1: Order Summary -->
+                <!-- Step 1: Order Summary (Enhanced) -->
                 <div id="checkout-step-1">
-                    <div
-                        style="background: var(--gray-100); padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-lg);">
-                        <div
-                            style="display: flex; gap: var(--space-md); align-items: center; margin-bottom: var(--space-md); padding-bottom: var(--space-md); border-bottom: 1px solid var(--gray-200);">
-                            <img id="modal-product-image" src="" alt=""
-                                style="width: 70px; height: 70px; border-radius: var(--radius-sm); object-fit: cover;">
-                            <div style="flex: 1;">
-                                <h4 id="modal-product-name" style="font-size: 1rem; margin-bottom: 4px;"></h4>
-                                <p style="color: var(--gray-500); font-size: 0.875rem;">Qty: <span
-                                        id="modal-qty">1</span></p>
+                    <!-- Order Card -->
+                    <div class="order-card">
+                        <div class="order-card-header">
+                            <img id="modal-product-image" src="" alt="Product">
+                            <div class="product-info">
+                                <h4 id="modal-product-name">Product Name</h4>
+                                <span class="qty-badge">Qty: <span id="modal-qty">1</span></span>
                             </div>
-                            <div style="text-align: right;">
-                                <p id="modal-product-price"
-                                    style="color: var(--primary); font-weight: 600; font-size: 1.1rem;"></p>
-                            </div>
+                            <div class="product-price" id="modal-product-price">₹0</div>
                         </div>
-
-                        <!-- Price Breakdown -->
-                        <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                        <div class="price-breakdown">
+                            <div class="price-row">
                                 <span>Subtotal</span>
                                 <span id="summary-subtotal">₹0</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                            <div class="price-row">
                                 <span>Shipping</span>
                                 <span id="summary-shipping" style="color: var(--success);">Free</span>
                             </div>
-                            <div
-                                style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; padding-top: var(--space-sm); border-top: 2px solid var(--gray-300); margin-top: var(--space-xs);">
-                                <span>Total</span>
-                                <span id="summary-total" style="color: var(--primary);">₹0</span>
+                            <div class="price-row total">
+                                <span>Total Amount</span>
+                                <span id="summary-total">₹0</span>
                             </div>
                         </div>
                     </div>
 
-                    <div
-                        style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(74, 14, 78, 0.1)); padding: var(--space-md); border-radius: var(--radius-md); display: flex; align-items: center; gap: var(--space-md);">
-                        <i class="fas fa-shield-alt" style="color: var(--primary); font-size: 1.5rem;"></i>
-                        <div>
-                            <p style="font-weight: 600; font-size: 0.9rem;">Secure Payment via Razorpay</p>
-                            <p style="font-size: 0.75rem; color: var(--gray-500);">UPI, Cards, NetBanking accepted</p>
+                    <!-- Delivery Estimate -->
+                    <div class="delivery-estimate">
+                        <i class="fas fa-truck"></i>
+                        <div class="delivery-text">
+                            <strong id="delivery-estimate-text">Estimated Delivery: 5-7 Business Days</strong>
+                            <span>Free shipping on this order</span>
+                        </div>
+                    </div>
+
+                    <!-- Security Banner -->
+                    <div class="security-banner">
+                        <div class="security-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="security-text">
+                            <h5>100% Secure Payment</h5>
+                            <p>Pay safely using Razorpay - UPI, Cards, NetBanking & Wallets</p>
+                        </div>
+                    </div>
+
+                    <!-- Trust Strip -->
+                    <div class="trust-strip">
+                        <div class="trust-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Genuine Products</span>
+                        </div>
+                        <div class="trust-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Secure Packaging</span>
+                        </div>
+                        <div class="trust-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Easy Returns</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 2: Customer Details (Hidden Initially) -->
+                <!-- Step 2: Customer Details (Enhanced) -->
                 <div id="checkout-step-2" style="display: none;">
-                    <form id="inquiry-form">
+                    <form id="inquiry-form" class="checkout-form">
                         <div class="form-group">
-                            <label class="form-label">Full Name *</label>
+                            <label class="form-label"><i class="fas fa-user"></i> Full Name *</label>
                             <input type="text" class="form-input" id="inq-name" placeholder="Enter your full name"
                                 required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Email Address *</label>
-                            <input type="email" class="form-input" id="inq-email" placeholder="Your email address"
-                                required>
+                            <label class="form-label"><i class="fas fa-envelope"></i> Email Address *</label>
+                            <input type="email" class="form-input" id="inq-email" placeholder="your@email.com" required>
+                            <p class="input-helper">Order confirmation will be sent to this email</p>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Contact Number *</label>
-                            <input type="tel" class="form-input" id="inq-phone" placeholder="Your phone number"
+                            <label class="form-label"><i class="fas fa-phone"></i> Contact Number *</label>
+                            <input type="tel" class="form-input" id="inq-phone" placeholder="10-digit mobile number"
                                 required>
+                            <p class="input-helper">For delivery updates and coordination</p>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Delivery Address *</label>
-                            <textarea class="form-input form-textarea" id="inq-address"
-                                placeholder="Enter complete delivery address with pincode" required></textarea>
+                            <label class="form-label"><i class="fas fa-map-marker-alt"></i> Delivery Address *</label>
+                            <textarea class="form-input form-textarea" id="inq-address" rows="3"
+                                placeholder="House/Flat No., Street, Landmark&#10;City, State - PIN Code"
+                                required></textarea>
                         </div>
                         <div class="form-group" id="saved-addresses-group" style="display: none;">
-                            <label class="form-label">Or select saved address:</label>
+                            <label class="form-label"><i class="fas fa-bookmark"></i> Or select saved address:</label>
                             <select class="form-input form-select" id="saved-addresses">
-                                <option value="">Choose an address...</option>
+                                <option value="">Choose a saved address...</option>
                             </select>
                         </div>
                     </form>
+
+                    <!-- Razorpay Badge -->
+                    <div class="razorpay-badge">
+                        <i class="fas fa-lock" style="color: var(--success);"></i>
+                        <span>Secured by Razorpay - 256-bit SSL Encryption</span>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-ghost modal-close" id="checkout-back-btn" style="display: none;">
-                    <i class="fas fa-arrow-left"></i> Back
-                </button>
-                <button class="btn btn-ghost modal-close" id="checkout-cancel-btn">Cancel</button>
-                <button class="btn btn-accent" id="checkout-next-btn">
-                    Proceed to Details <i class="fas fa-arrow-right"></i>
-                </button>
-                <button class="btn btn-accent" id="submit-inquiry" style="display: none;">
-                    <i class="fas fa-lock"></i> Pay <span id="pay-btn-amount">₹0</span>
-                </button>
+            <div class="modal-footer" style="flex-direction: column; gap: var(--space-md);">
+                <div style="display: flex; gap: var(--space-md); width: 100%;">
+                    <button class="btn btn-ghost" id="checkout-back-btn" style="display: none; flex: 1;">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-ghost modal-close" id="checkout-cancel-btn" style="flex: 1;">Cancel</button>
+                    <button class="btn btn-accent" id="checkout-next-btn" style="flex: 2;">
+                        Continue <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button class="pay-btn" id="submit-inquiry" style="display: none; flex: 2;">
+                        <span class="lock-icon"><i class="fas fa-lock"></i></span>
+                        Pay Securely <span id="pay-btn-amount">₹0</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+
 
     <!-- Success Modal -->
     <div class="modal-overlay" id="success-modal">
@@ -712,9 +1106,88 @@
         // Load product from Firestore
         async function loadProduct() {
             const urlParams = new URLSearchParams(window.location.search);
+
+            // Check for payment return status
+            const paymentStatus = urlParams.get('status');
+            if (paymentStatus === 'success') {
+                const pendingOrderStr = sessionStorage.getItem('pendingOrder');
+                if (pendingOrderStr) {
+                    try {
+                        const pendingOrder = JSON.parse(pendingOrderStr);
+
+                        // Generate unique Order Number
+                        const orderNumber = '#ORD-' + Math.floor(100000 + Math.random() * 900000);
+
+                        // Save order to Firestore
+                        await addDoc(collection(db, 'orders'), {
+                            orderNumber: orderNumber,
+                            userId: currentUser?.uid || null,
+                            productId: pendingOrder.productId,
+                            productName: pendingOrder.productName,
+                            productPrice: pendingOrder.productPrice,
+                            productImage: pendingOrder.productImage,
+                            quantity: pendingOrder.quantity,
+                            shippingCost: pendingOrder.shippingCost,
+                            totalAmount: pendingOrder.totalAmount,
+                            customerName: pendingOrder.customerName,
+                            customerEmail: pendingOrder.customerEmail,
+                            customerPhone: pendingOrder.customerPhone,
+                            deliveryAddress: pendingOrder.deliveryAddress,
+                            status: 'paid',
+                            paymentStatus: 'paid',
+                            paymentId: pendingOrder.txnid,
+                            paymentMethod: 'payu',
+                            txnid: pendingOrder.txnid,
+                            createdAt: serverTimestamp()
+                        });
+
+                        // Update stock
+                        const productDoc = await getDoc(doc(db, 'products', pendingOrder.productId));
+                        if (productDoc.exists()) {
+                            const currentStock = productDoc.data().stockQuantity || 1;
+                            const newStockQty = Math.max(0, currentStock - pendingOrder.quantity);
+                            await updateDoc(doc(db, 'products', pendingOrder.productId), {
+                                stockQuantity: newStockQty,
+                                stockStatus: newStockQty <= 0 ? 'sold' : 'available'
+                            });
+                        }
+
+                        // Populate success modal
+                        document.getElementById('success-order-number').textContent = orderNumber;
+                        document.getElementById('success-product-name').textContent = pendingOrder.productName;
+                        document.getElementById('success-amount').textContent = formatPrice(pendingOrder.totalAmount);
+
+                        document.getElementById('success-modal').classList.add('active');
+                        showToast('Payment Successful! Order Placed.', 'success');
+
+                        // Clear pending order
+                        sessionStorage.removeItem('pendingOrder');
+
+                        // Clean URL
+                        window.history.replaceState({}, document.title, window.location.pathname + window.location.search.replace(/[?&]status=success/, ''));
+                    } catch (err) {
+                        console.error('Error saving order after payment:', err);
+                        showToast('Payment successful but error saving order. Contact support.', 'error');
+                    }
+                }
+            } else if (paymentStatus === 'failure') {
+                showToast('Payment failed. Please try again.', 'error');
+                sessionStorage.removeItem('pendingOrder');
+                window.history.replaceState({}, document.title, window.location.pathname + window.location.search.replace(/[?&]status=failure/, ''));
+            }
+
             const productId = urlParams.get('id');
 
-            if (!productId) {
+            if (!productId && !paymentStatus) {
+                window.location.href = 'catalog.html';
+                return;
+            } else if (!productId && paymentStatus) {
+                // If we have status but no ID, we might have lost potential to show product, but usually ID is preserved in URL or can be retrieved from pendingOrder
+                if (sessionStorage.getItem('pendingOrder')) {
+                    const pending = JSON.parse(sessionStorage.getItem('pendingOrder'));
+                    window.location.href = `product.html?id=${pending.productId}`;
+                    return;
+                }
                 window.location.href = 'catalog.html';
                 return;
             }
@@ -928,15 +1401,16 @@
             document.getElementById('submit-inquiry').style.display = 'none';
             document.getElementById('checkout-back-btn').style.display = 'none';
             document.getElementById('checkout-cancel-btn').style.display = 'inline-flex';
-            document.getElementById('modal-title').textContent = 'Order Summary';
+            document.getElementById('modal-title').textContent = 'Secure Checkout';
 
-            // Reset step indicators
-            document.getElementById('step-2-circle').style.background = 'var(--gray-300)';
-            document.getElementById('step-2-circle').style.color = 'var(--gray-500)';
-            document.getElementById('step-2-text').style.color = 'var(--gray-500)';
+            // Reset progress bar
+            document.getElementById('checkout-progress').classList.remove('step-2');
+            document.getElementById('progress-step-1').classList.add('active');
+            document.getElementById('progress-step-1').classList.remove('completed');
+            document.getElementById('progress-step-2').classList.remove('active');
         }
 
-        // Buy Now - Open Modal (Login Required)
+        // Buy Now - Redirect to Checkout Page
         document.getElementById('buy-now-btn').addEventListener('click', () => {
             // Check if user is logged in
             if (!currentUser) {
@@ -946,7 +1420,21 @@
                 return;
             }
 
-            openCheckoutModal();
+            // Prepare checkout data
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const checkoutData = {
+                productId: currentProduct.id,
+                name: currentProduct.name,
+                price: currentProduct.price,
+                image: currentProduct.images ? (currentProduct.images[currentProduct.mainImageIndex || 0] || currentProduct.images[0]) : currentProduct.image,
+                quantity: quantity,
+                freeDelivery: currentProduct.freeDelivery || false,
+                shippingCost: currentProduct.shippingCost || 0
+            };
+
+            // Store in session and redirect
+            sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+            window.location.href = 'checkout.html';
         });
 
         // Open checkout modal function
@@ -958,6 +1446,10 @@
 
             // Update summary
             updateOrderSummary();
+
+            // Update delivery estimate
+            const deliveryTime = currentProduct.deliveryTime || '5-7 Business Days';
+            document.getElementById('delivery-estimate-text').textContent = 'Estimated Delivery: ' + deliveryTime;
 
             // Prefill if logged in
             if (currentUser && userData) {
@@ -971,7 +1463,7 @@
                     const select = document.getElementById('saved-addresses');
                     group.style.display = 'block';
 
-                    select.innerHTML = '<option value="">Choose an address...</option>' +
+                    select.innerHTML = '<option value="">Choose a saved address...</option>' +
                         userData.addresses.map((addr, i) => `<option value="${i}">${addr.label || 'Address'}: ${addr.address.substring(0, 40)}...</option>`).join('');
 
                     select.addEventListener('change', () => {
@@ -1016,6 +1508,24 @@
                 showToast('Login successful!', 'success');
                 document.getElementById('login-required-modal').classList.remove('active');
 
+                // If there was a pending buy action, redirect to checkout
+                if (pendingBuyAction) {
+                    pendingBuyAction = false;
+                    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+                    const checkoutData = {
+                        productId: currentProduct.id,
+                        name: currentProduct.name,
+                        price: currentProduct.price,
+                        image: currentProduct.images ? (currentProduct.images[currentProduct.mainImageIndex || 0] || currentProduct.images[0]) : currentProduct.image,
+                        quantity: quantity,
+                        freeDelivery: currentProduct.freeDelivery || false,
+                        shippingCost: currentProduct.shippingCost || 0
+                    };
+                    sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+                    window.location.href = 'checkout.html';
+                    return;
+                }
+
                 // User data will be loaded by onAuthStateChanged
             } catch (error) {
                 console.error('Google sign-in error:', error);
@@ -1037,16 +1547,16 @@
             document.getElementById('checkout-step-1').style.display = 'none';
             document.getElementById('checkout-step-2').style.display = 'block';
             document.getElementById('checkout-next-btn').style.display = 'none';
-            document.getElementById('submit-inquiry').style.display = 'inline-flex';
+            document.getElementById('submit-inquiry').style.display = 'flex';
             document.getElementById('checkout-back-btn').style.display = 'inline-flex';
             document.getElementById('checkout-cancel-btn').style.display = 'none';
             document.getElementById('modal-title').textContent = 'Delivery Details';
 
-            // Update step indicators
-            document.getElementById('step-2-circle').style.background = 'var(--primary)';
-            document.getElementById('step-2-circle').style.color = 'white';
-            document.getElementById('step-2-text').style.color = 'var(--primary)';
-            document.getElementById('step-2-text').style.fontWeight = '500';
+            // Update progress bar
+            document.getElementById('checkout-progress').classList.add('step-2');
+            document.getElementById('progress-step-1').classList.remove('active');
+            document.getElementById('progress-step-1').classList.add('completed');
+            document.getElementById('progress-step-2').classList.add('active');
         });
 
         // Step Navigation: Back (Step 2 → Step 1)
@@ -1064,7 +1574,7 @@
             });
         });
 
-        // Submit Order
+        // Submit Order with Razorpay
         document.getElementById('submit-inquiry').addEventListener('click', async () => {
             const name = document.getElementById('inq-name').value.trim();
             const email = document.getElementById('inq-email').value.trim();
@@ -1076,9 +1586,21 @@
                 return;
             }
 
+            // Validate phone number
+            if (!/^[6-9]\d{9}$/.test(phone)) {
+                showToast('Please enter a valid 10-digit mobile number', 'error');
+                return;
+            }
+
+            // Validate email
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
             const btn = document.getElementById('submit-inquiry');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing Payment...';
 
             try {
                 const quantity = parseInt(document.getElementById('quantity').value);
@@ -1086,142 +1608,136 @@
                 const shipping = (currentProduct.freeDelivery || currentProduct.shippingCost === 0) ? 0 : (currentProduct.shippingCost || 0);
                 const totalAmount = (price * quantity) + shipping;
 
-                // PayU Test Credentials
-                const PAYU_KEY = 'U4FAmi';
-                const PAYU_SALT = '7ac1BK3Kv6Vll3ztWWSPsoGO07Y0Yi3p';
+                // ============================================
+                // RAZORPAY CONFIGURATION
+                // ============================================
+                // Replace 'YOUR_LIVE_KEY_ID' with your actual Razorpay Live Key ID
+                // Get your keys from: https://dashboard.razorpay.com/app/keys
+                const RAZORPAY_KEY_ID = 'rzp_live_S2A4DCsVnVxHHC';
+                // ============================================
 
-                // Generate unique transaction ID
-                const txnid = 'TXN' + Date.now() + Math.floor(Math.random() * 1000);
+                // Generate unique order reference
+                const orderRef = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
 
-                // PayU hash generation (SHA-512)
-                // Hash format: key|txnid|amount|productinfo|firstname|email|||||||||||salt
-                async function generatePayUHash(key, txnid, amount, productinfo, firstname, email, salt) {
-                    const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
-                    const encoder = new TextEncoder();
-                    const data = encoder.encode(hashString);
-                    const hashBuffer = await crypto.subtle.digest('SHA-512', data);
-                    const hashArray = Array.from(new Uint8Array(hashBuffer));
-                    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                    return hashHex;
-                }
-
-                const hash = await generatePayUHash(
-                    PAYU_KEY,
-                    txnid,
-                    totalAmount.toFixed(2),
-                    currentProduct.name,
-                    name.split(' ')[0],
-                    email,
-                    PAYU_SALT
-                );
-
-                const payuData = {
-                    key: PAYU_KEY,
-                    txnid: txnid,
-                    amount: totalAmount.toFixed(2),
-                    productinfo: currentProduct.name,
-                    firstname: name.split(' ')[0],
-                    lastname: name.split(' ').slice(1).join(' ') || '',
-                    email: email,
-                    phone: phone,
-                    surl: window.location.origin + '/success.html',
-                    furl: window.location.origin + '/failure.html',
-                    hash: hash
-                };
-
-                // Store order data for after payment success
-                const orderData = {
-                    productId: currentProduct.id,
-                    productName: currentProduct.name,
-                    productPrice: currentProduct.price,
-                    productImage: currentProduct.images ? (currentProduct.images[currentProduct.mainImageIndex || 0] || currentProduct.images[0]) : currentProduct.image,
-                    quantity: quantity,
-                    shippingCost: shipping,
-                    totalAmount: totalAmount,
-                    customerName: name,
-                    customerEmail: email,
-                    customerPhone: phone,
-                    deliveryAddress: address
-                };
-                sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
-
-                bolt.launch(payuData, {
-                    responseHandler: async function (response) {
+                // Razorpay Checkout Options
+                const options = {
+                    key: RAZORPAY_KEY_ID,
+                    amount: Math.round(totalAmount * 100), // Amount in paise (INR × 100)
+                    currency: 'INR',
+                    name: 'NovaGlow',
+                    description: currentProduct.name + (quantity > 1 ? ` (Qty: ${quantity})` : ''),
+                    image: 'https://i.imgur.com/yourlogo.png', // Optional: Add your logo URL
+                    prefill: {
+                        name: name,
+                        email: email,
+                        contact: phone
+                    },
+                    notes: {
+                        productId: currentProduct.id,
+                        productName: currentProduct.name,
+                        quantity: quantity,
+                        address: address,
+                        orderRef: orderRef
+                    },
+                    theme: {
+                        color: '#4a0e4e', // NovaGlow primary color
+                        backdrop_color: 'rgba(0,0,0,0.7)'
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span class="lock-icon"><i class="fas fa-lock"></i></span> Pay Securely <span id="pay-btn-amount">' + formatPrice(totalAmount) + '</span>';
+                            showToast('Payment cancelled', 'warning');
+                        }
+                    },
+                    handler: async function (response) {
+                        // Payment successful
                         try {
-                            console.log('PayU Response:', response);
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming Order...';
 
-                            if (response.response.txnStatus === 'SUCCESS') {
-                                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming Order...';
+                            // Generate Order Number
+                            const orderNumber = '#ORD-' + Math.floor(100000 + Math.random() * 900000);
 
-                                // Generate unique Order Number
-                                const orderNumber = '#ORD-' + Math.floor(100000 + Math.random() * 900000);
+                            // Save order to Firestore
+                            await addDoc(collection(db, 'orders'), {
+                                orderNumber: orderNumber,
+                                userId: currentUser?.uid || null,
+                                productId: currentProduct.id,
+                                productName: currentProduct.name,
+                                productPrice: currentProduct.price,
+                                productImage: currentProduct.images ? (currentProduct.images[currentProduct.mainImageIndex || 0] || currentProduct.images[0]) : currentProduct.image,
+                                quantity: quantity,
+                                shippingCost: shipping,
+                                totalAmount: totalAmount,
+                                customerName: name,
+                                customerEmail: email,
+                                customerPhone: phone,
+                                deliveryAddress: address,
+                                status: 'confirmed',
+                                paymentStatus: 'paid',
+                                paymentMethod: 'razorpay',
+                                razorpayPaymentId: response.razorpay_payment_id,
+                                razorpayOrderId: response.razorpay_order_id || null,
+                                razorpaySignature: response.razorpay_signature || null,
+                                createdAt: serverTimestamp()
+                            });
 
-                                // Save order to Firestore
-                                await addDoc(collection(db, 'orders'), {
-                                    orderNumber: orderNumber,
-                                    userId: currentUser?.uid || null,
-                                    productId: currentProduct.id,
-                                    productName: currentProduct.name,
-                                    productPrice: currentProduct.price,
-                                    productImage: currentProduct.images ? (currentProduct.images[currentProduct.mainImageIndex || 0] || currentProduct.images[0]) : currentProduct.image,
-                                    quantity: quantity,
-                                    shippingCost: shipping,
-                                    totalAmount: totalAmount,
-                                    customerName: name,
-                                    customerEmail: email,
-                                    customerPhone: phone,
-                                    deliveryAddress: address,
-                                    status: 'paid',
-                                    paymentStatus: 'paid',
-                                    paymentId: response.response.payuMoneyId || txnid,
-                                    paymentMethod: 'payu',
-                                    txnid: txnid,
-                                    createdAt: serverTimestamp()
-                                });
-
-                                // Update stock
-                                const newStockQty = Math.max(0, (currentProduct.stockQuantity || 1) - quantity);
+                            // Update stock
+                            const productDoc = await getDoc(doc(db, 'products', currentProduct.id));
+                            if (productDoc.exists()) {
+                                const currentStock = productDoc.data().stockQuantity || 1;
+                                const newStockQty = Math.max(0, currentStock - quantity);
                                 await updateDoc(doc(db, 'products', currentProduct.id), {
                                     stockQuantity: newStockQty,
                                     stockStatus: newStockQty <= 0 ? 'sold' : 'available'
                                 });
-
-                                // Populate success modal
-                                document.getElementById('success-order-number').textContent = orderNumber;
-                                document.getElementById('success-product-name').textContent = currentProduct.name;
-                                document.getElementById('success-amount').textContent = formatPrice(totalAmount);
-
-                                document.getElementById('inquiry-modal').classList.remove('active');
-                                document.getElementById('success-modal').classList.add('active');
-                                showToast('Payment Successful! Order Placed.', 'success');
-
-                                sessionStorage.removeItem('pendingOrder');
-                            } else {
-                                showToast('Payment failed: ' + (response.response.txnMessage || 'Unknown error'), 'error');
                             }
-                        } catch (err) {
-                            console.error('Error processing payment:', err);
-                            showToast('Payment error. Please contact support.', 'error');
-                        } finally {
+
+                            // Close checkout modal
+                            document.getElementById('inquiry-modal').classList.remove('active');
+
+                            // Show success modal
+                            document.getElementById('success-order-number').textContent = orderNumber;
+                            document.getElementById('success-product-name').textContent = currentProduct.name;
+                            document.getElementById('success-amount').textContent = formatPrice(totalAmount);
+                            document.getElementById('success-modal').classList.add('active');
+
+                            showToast('Payment Successful! Order Confirmed.', 'success');
+
+                            // Reset button
                             btn.disabled = false;
-                            btn.innerHTML = '<i class="fas fa-lock"></i> Pay <span id="pay-btn-amount">' + formatPrice(totalAmount) + '</span>';
+                            btn.innerHTML = '<span class="lock-icon"><i class="fas fa-lock"></i></span> Pay Securely <span id="pay-btn-amount">' + formatPrice(totalAmount) + '</span>';
+                            resetCheckoutToStep1();
+
+                        } catch (error) {
+                            console.error('Error saving order:', error);
+                            showToast('Payment received but error saving order. Please contact support with payment ID: ' + response.razorpay_payment_id, 'error');
+                            btn.disabled = false;
+                            btn.innerHTML = '<span class="lock-icon"><i class="fas fa-lock"></i></span> Pay Securely <span id="pay-btn-amount">' + formatPrice(totalAmount) + '</span>';
                         }
-                    },
-                    catchException: function (response) {
-                        console.error('PayU Exception:', response);
-                        showToast('Payment cancelled or failed.', 'info');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-lock"></i> Pay <span id="pay-btn-amount">' + formatPrice(totalAmount) + '</span>';
                     }
+                };
+
+                // Open Razorpay Checkout
+                const rzp = new Razorpay(options);
+
+                rzp.on('payment.failed', function (response) {
+                    console.error('Payment failed:', response.error);
+                    showToast('Payment failed: ' + (response.error.description || 'Please try again'), 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="lock-icon"><i class="fas fa-lock"></i></span> Pay Securely <span id="pay-btn-amount">' + formatPrice(totalAmount) + '</span>';
                 });
+
+                rzp.open();
 
             } catch (error) {
                 console.error('Error initiating payment:', error);
                 showToast('Error initiating payment. Please try again.', 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-lock"></i> Pay <span id="pay-btn-amount">₹0</span>';
+                btn.innerHTML = '<span class="lock-icon"><i class="fas fa-lock"></i></span> Pay Securely <span id="pay-btn-amount">₹0</span>';
             }
         });
+
 
         // Add to Cart
         document.getElementById('add-cart-btn').addEventListener('click', async () => {
